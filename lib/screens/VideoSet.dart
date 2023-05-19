@@ -371,6 +371,7 @@ class _VideoSetState extends State<VideoSet> {
                         size: 30.h, color: const Color(0xFFFFFFFF))),
                 onTap: () {
                   //Navigate to chat
+                  Navigator.pushNamed(context, "/chat");
                 },
               ),
               GestureDetector(
