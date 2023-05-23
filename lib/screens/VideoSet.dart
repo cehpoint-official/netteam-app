@@ -145,7 +145,6 @@ class _VideoSetState extends State<VideoSet> {
                 ),
                 Row(
                   children: [
-                    
                     Expanded(
                       child: Text(
                         "Based on 3 interest details that you added above",
@@ -155,7 +154,9 @@ class _VideoSetState extends State<VideoSet> {
                             fontWeight: FontWeight.w500),
                       ),
                     ),
-                    SizedBox(width: 15.w,),
+                    SizedBox(
+                      width: 15.w,
+                    ),
                     SizedBox(
                       height: 35.h,
                       width: 106.w,
@@ -221,17 +222,18 @@ class _VideoSetState extends State<VideoSet> {
                       },
                     ),
                   ),
-                  
-                    SizedBox(width: 15.w,),
-                   Expanded(
-                      child: Text(
-                        "Based on interest details that you added in your profile",
-                        style: GoogleFonts.roboto(
-                            fontSize: 13.sp,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500),
-                      ),
+                  SizedBox(
+                    width: 15.w,
+                  ),
+                  Expanded(
+                    child: Text(
+                      "Based on interest details that you added in your profile",
+                      style: GoogleFonts.roboto(
+                          fontSize: 13.sp,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w500),
                     ),
+                  ),
                 ],
               ),
               SizedBox(
@@ -362,6 +364,7 @@ class _VideoSetState extends State<VideoSet> {
                         size: 30.h, color: const Color(0xFFFFFFFF))),
                 onTap: () {
                   //Navigate to Add tiktok
+                  Navigator.pushNamed(context, "/live");
                 },
               ),
               GestureDetector(

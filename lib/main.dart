@@ -4,6 +4,7 @@ import 'package:netteam/screens/Chat.dart';
 import 'package:netteam/screens/ForgotPassword.dart';
 import 'package:netteam/screens/Home.dart';
 import 'package:netteam/screens/Interests.dart';
+import 'package:netteam/screens/Live.dart';
 import 'package:netteam/screens/ResetPassword.dart';
 import 'package:netteam/screens/Verify.dart';
 import 'package:netteam/screens/VideoSet.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
             "/videocall" : (context) => const VideoCall(),
             "/videoset" : (context) => const VideoSet(),
             "/chat": (context) => const Chat(),
+            "/live": (context) => const Live(),
           },
         );
       },

@@ -138,12 +138,16 @@ class _HomeState extends State<Home> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
-                                        SizedBox(height: 10.h,),
+                                        SizedBox(
+                                          height: 10.h,
+                                        ),
                                         GestureDetector(
-                                          onTap: () {
-                                            
-                                          },
-                                          child: Image.asset("assets/icons/comment.png", height: 30.h, width: 30.h,)),
+                                            onTap: () {},
+                                            child: Image.asset(
+                                              "assets/icons/comment.png",
+                                              height: 30.h,
+                                              width: 30.h,
+                                            )),
                                         Text(
                                           "2K",
                                           style: GoogleFonts.roboto(
@@ -187,13 +191,16 @@ class _HomeState extends State<Home> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.start,
                                       children: [
-
-                                        SizedBox(height: 5.h,),
+                                        SizedBox(
+                                          height: 5.h,
+                                        ),
                                         GestureDetector(
-                                          onTap: () {
-                                            
-                                          },
-                                          child: Image.asset("assets/icons/share.png", height: 30.h, width: 30.h,)),
+                                            onTap: () {},
+                                            child: Image.asset(
+                                              "assets/icons/share.png",
+                                              height: 30.h,
+                                              width: 30.h,
+                                            )),
                                         Text(
                                           "5K",
                                           style: GoogleFonts.roboto(
@@ -272,6 +279,7 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to Add tiktok
+                    Navigator.pushNamed(context, "/live");
                   },
                 ),
                 GestureDetector(
