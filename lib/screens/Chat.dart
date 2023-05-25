@@ -128,6 +128,15 @@ class _BodyState extends State<Body> {
   ];
 
   TextEditingController _textEditingController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
 
   void addText() {
     if (_textEditingController.text != '') {
@@ -137,6 +146,7 @@ class _BodyState extends State<Body> {
       });
       _textEditingController.text = '';
       FocusScope.of(context).unfocus();
+      _scrollToBottom();
     }
   }
 
@@ -147,6 +157,7 @@ class _BodyState extends State<Body> {
       padding: EdgeInsets.fromLTRB(15.w, 0, 15.w, 10.h),
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
+       
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -248,6 +259,7 @@ class _BodyState extends State<Body> {
             SizedBox(
               height: isRequestVisible ? 505.h : 610.h,
               child: ListView.builder(
+                  controller: _scrollController,
                   shrinkWrap: true,
                   itemCount: _chatList.length,
                   itemBuilder: (BuildContext context, int index) {

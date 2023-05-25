@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:netteam/screens/Chat.dart';
 
 class Live extends StatefulWidget {
   const Live({super.key});
@@ -13,7 +15,49 @@ class Live extends StatefulWidget {
 
 class _LiveState extends State<Live> {
   bool isBeautyOn = false;
+  bool isLive = false;
   int timer = 0;
+
+  final List<LiveChat> _chatList = <LiveChat>[
+    LiveChat(
+        userName: "iamraj",
+        imageUrl: "assets/images/profile1.png",
+        chat: "Hi bro"),
+    LiveChat(
+        userName: "iamkumar",
+        imageUrl: "assets/images/profile2.png",
+        chat: "Hi, Love from India"),
+    LiveChat(
+        userName: "iamresin",
+        imageUrl: "assets/images/profile3.png",
+        chat: "Hi bro, Love from Sydney")
+  ];
+
+  TextEditingController _textEditingController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void addText() {
+    if (_textEditingController.text != '') {
+      setState(() {
+        _chatList.add(LiveChat(
+            userName: "iamaswin",
+            imageUrl: "assets/images/profile4.png",
+            chat: _textEditingController.text));
+      });
+      _textEditingController.text = '';
+      FocusScope.of(context).unfocus();
+      _scrollToBottom();
+    }
+  }
+
   final List<String> _iconPath = <String>[
     "assets/icons/timer3.png",
     "assets/icons/Timer5.png"
@@ -39,23 +83,38 @@ class _LiveState extends State<Live> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        decoration: BoxDecoration(boxShadow: [
-                          BoxShadow(
-                              color: Color.fromRGBO(0, 0, 0, 0.5),
-                              blurRadius: 50.r,
-                              offset: Offset(0, 0.33))
-                        ]),
-                        child: IconButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            icon: Icon(
-                              Icons.close,
-                              size: 25.h,
-                              color: Colors.white,
-                            )),
-                      ),
+                      isLive
+                          ? Container(
+                            margin: EdgeInsets.all(5.h),
+                              height: 30.h,
+                              width: 100.w,
+                              child: ElevatedButton(
+                                style: ButtonStyle(
+                                  backgroundColor: MaterialStateProperty.all(Colors.red)
+                                ),
+                                child: Text('End Live', style: GoogleFonts.roboto(fontWeight: FontWeight.bold),),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            )
+                          : Container(
+                              decoration: BoxDecoration(boxShadow: [
+                                BoxShadow(
+                                    color: Color.fromRGBO(0, 0, 0, 0.5),
+                                    blurRadius: 50.r,
+                                    offset: Offset(0, 0.33))
+                              ]),
+                              child: IconButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  icon: Icon(
+                                    Icons.close,
+                                    size: 25.h,
+                                    color: Colors.white,
+                                  )),
+                            ),
                       Container(
                         decoration: BoxDecoration(boxShadow: [
                           BoxShadow(
@@ -210,29 +269,92 @@ class _LiveState extends State<Live> {
                       )
                     ],
                   )),
-              Padding(
-                padding: EdgeInsets.only(bottom: 30.h),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(30.r),
-                  child: SizedBox(
-                    height: 50.h,
-                    width: 200.h,
-                    child: ElevatedButton(
-                      onPressed: () {},
-                      style: ButtonStyle(
-                          backgroundColor:
-                              MaterialStateProperty.all(const Color(0xFF00E9F7))),
-                      child: Text(
-                        "Go Live",
-                        style: GoogleFonts.roboto(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
+              isLive
+                  ? SizedBox(
+                      height: 200.h,
+                      width: 375.w,
+                      //color: Colors.amber,
+                      child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: ListView.builder(
+                          controller: _scrollController,
+                          itemCount: _chatList.length,
+                          shrinkWrap: true,
+                          itemBuilder: (BuildContext context, int index) {
+                            LiveChat message = _chatList[index];
+                            return Padding(
+                              padding: EdgeInsets.all(5.h),
+                              child: Container(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      height: 40.h,
+                                      child: CircleAvatar(
+                                        radius: 20.r,
+                                        backgroundImage: AssetImage(
+                                          message.imageUrl,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: 10.w,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "@${message.userName}",
+                                          style: GoogleFonts.roboto(
+                                              fontSize: 15.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white),
+                                        ),
+                                        Text(
+                                          "${message.chat}",
+                                          style: GoogleFonts.roboto(
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.normal,
+                                              color: Colors.white),
+                                        )
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ))
+                  : Padding(
+                      padding: EdgeInsets.only(bottom: 30.h),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30.r),
+                        child: SizedBox(
+                          height: 50.h,
+                          width: 200.h,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                isLive = !isLive;
+                              });
+                            },
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                    const Color(0xFF00E9F7))),
+                            child: Text(
+                              "Go Live",
+                              style: GoogleFonts.roboto(
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                ),
-              )
+                    )
             ],
           )
         ],
@@ -242,49 +364,115 @@ class _LiveState extends State<Live> {
         color: Colors.black,
         child: Container(
           height: 50.h,
-          padding: EdgeInsets.only(top: 15.h),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GestureDetector(
-                  child: Text(
-                "15s",
-                style: GoogleFonts.roboto(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey),
-              )),
-              SizedBox(width: 30.w),
-              GestureDetector(
-                  child: Text(
-                "30s",
-                style: GoogleFonts.roboto(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey),
-              )),
-              SizedBox(width: 30.w),
-              Column(
-                children: [
-                  Text(
-                    "Live",
-                    style: GoogleFonts.roboto(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+          padding: EdgeInsets.all(5.h),
+          child: isLive
+              ? Container(
+                  height: 50.h,
+                  width: 350.w,
+                  padding: EdgeInsets.symmetric(horizontal: 10.w),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25.r),
+                      border: Border.all(color: Colors.white)),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          maxLengthEnforcement: MaxLengthEnforcement.none,
+                          controller: _textEditingController,
+                          onSubmitted: (val) {
+                            addText();
+                          },
+                          decoration: InputDecoration(
+                              hintText: 'Type a Message',
+                              hintStyle: GoogleFonts.roboto(
+                                  fontSize: 15.sp,
+                                  color: const Color(0xFFB6B7B8),
+                                  fontWeight: FontWeight.bold),
+                              border: const OutlineInputBorder(
+                                borderSide: BorderSide(
+                                    color: Color.fromRGBO(0, 0, 0, 0)),
+                              ),
+                              enabledBorder: const OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.transparent)),
+                              focusedBorder: const OutlineInputBorder(
+                                  borderSide:
+                                      BorderSide(color: Colors.transparent))),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 5.w,
+                      ),
+                      VerticalDivider(
+                        color: const Color(0xFFB6B7B8),
+                        width: 1.h,
+                      ),
+                      SizedBox(
+                        width: 5.w,
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            addText();
+                          },
+                          icon: Icon(
+                            Icons.send_outlined,
+                            size: 20.h,
+                            color: const Color(0xFF491BBA),
+                          ))
+                    ],
                   ),
-                  Icon(
-                    Icons.circle,
-                    size: 5.h,
-                    color: Colors.white,
-                  )
-                ],
-              )
-            ],
-          ),
+                )
+              : Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    GestureDetector(
+                        child: Text(
+                      "15s",
+                      style: GoogleFonts.roboto(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey),
+                    )),
+                    SizedBox(width: 30.w),
+                    GestureDetector(
+                        child: Text(
+                      "30s",
+                      style: GoogleFonts.roboto(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey),
+                    )),
+                    SizedBox(width: 30.w),
+                    Column(
+                      children: [
+                        Text(
+                          "Live",
+                          style: GoogleFonts.roboto(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        ),
+                        Icon(
+                          Icons.circle,
+                          size: 5.h,
+                          color: Colors.white,
+                        )
+                      ],
+                    )
+                  ],
+                ),
         ),
       ),
     );
   }
+}
+
+class LiveChat {
+  String userName;
+  String imageUrl;
+  String chat;
+  LiveChat(
+      {required this.userName, required this.imageUrl, required this.chat});
 }
