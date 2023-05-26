@@ -364,7 +364,7 @@ class _VideoSetState extends State<VideoSet> {
                         size: 30.h, color: const Color(0xFFFFFFFF))),
                 onTap: () {
                   //Navigate to Add tiktok
-                  Navigator.pushNamed(context, "/live");
+                  Navigator.pushNamed(context, "/video15");
                 },
               ),
               GestureDetector(
@@ -374,7 +374,7 @@ class _VideoSetState extends State<VideoSet> {
                         size: 30.h, color: const Color(0xFFFFFFFF))),
                 onTap: () {
                   //Navigate to chat
-                  Navigator.pushNamed(context, "/chat");
+                  Navigator.pushNamed(context, "/chatlist");
                 },
               ),
               GestureDetector(

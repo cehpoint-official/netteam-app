@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netteam/screens/Chat.dart';
+import 'package:netteam/screens/Chatlist.dart';
 import 'package:netteam/screens/ForgotPassword.dart';
 import 'package:netteam/screens/Home.dart';
 import 'package:netteam/screens/Interests.dart';
 import 'package:netteam/screens/Live.dart';
 import 'package:netteam/screens/ResetPassword.dart';
 import 'package:netteam/screens/Verify.dart';
+import 'package:netteam/screens/Video15.dart';
+import 'package:netteam/screens/Video30.dart';
 import 'package:netteam/screens/VideoSet.dart';
 import 'package:netteam/screens/login.dart';
 import 'package:netteam/screens/signup.dart';
@@ -49,6 +52,9 @@ class MyApp extends StatelessWidget {
             "/videoset" : (context) => const VideoSet(),
             "/chat": (context) => const Chat(),
             "/live": (context) => const Live(),
+            "/video15": (context) => const Video15(),
+            "/video30": (context) => const Video30(),
+            "/chatlist" : (context) => const ChatList(),
           },
         );
       },

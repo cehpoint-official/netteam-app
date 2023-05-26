@@ -85,16 +85,20 @@ class _LiveState extends State<Live> {
                     children: [
                       isLive
                           ? Container(
-                            margin: EdgeInsets.all(5.h),
+                              margin: EdgeInsets.all(5.h),
                               height: 30.h,
                               width: 100.w,
                               child: ElevatedButton(
                                 style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(Colors.red)
+                                    backgroundColor:
+                                        MaterialStateProperty.all(Colors.red)),
+                                child: Text(
+                                  'End Live',
+                                  style: GoogleFonts.roboto(
+                                      fontWeight: FontWeight.bold),
                                 ),
-                                child: Text('End Live', style: GoogleFonts.roboto(fontWeight: FontWeight.bold),),
                                 onPressed: () {
-                                  Navigator.pop(context);
+                                  Navigator.pushNamed(context, "/");
                                 },
                               ),
                             )
@@ -428,22 +432,30 @@ class _LiveState extends State<Live> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     GestureDetector(
+                        onTap: () {
+                          //Argument should be true if its 15s else false
+                          Navigator.pushNamed(context, "/video15", arguments: true);
+                        },
                         child: Text(
-                      "15s",
-                      style: GoogleFonts.roboto(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey),
-                    )),
+                          "15s",
+                          style: GoogleFonts.roboto(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey),
+                        )),
                     SizedBox(width: 30.w),
                     GestureDetector(
+                        onTap: () {
+                          //Argument should be true if its 15s else false
+                          Navigator.pushNamed(context, "/video30", arguments: false);
+                        },
                         child: Text(
-                      "30s",
-                      style: GoogleFonts.roboto(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey),
-                    )),
+                          "30s",
+                          style: GoogleFonts.roboto(
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey),
+                        )),
                     SizedBox(width: 30.w),
                     Column(
                       children: [
