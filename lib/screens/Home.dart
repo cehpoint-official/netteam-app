@@ -131,6 +131,7 @@ class _HomeState extends State<Home> {
                             child: Icon(_comment.isLiked
                                   ? CupertinoIcons.heart_fill
                                   : CupertinoIcons.heart,
+                                  color: Colors.white,
                                   size: 20.h,),
                           ),
                           
