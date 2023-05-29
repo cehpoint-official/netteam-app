@@ -26,187 +26,10 @@ class _HomeState extends State<Home> {
     "assets/images/tiktok_image.png",
   ];
 
-  final List<Comment> _commentList = <Comment>[
-    Comment(
-        imageUrl: "assets/images/profile1.png",
-        userName: "iamraj",
-        comment: "Wow nice!",
-        noOfLikes: 10,
-        isLiked: false),
-    Comment(
-        imageUrl: "assets/images/profile2.png",
-        userName: "iamkumar",
-        comment: "It's a nice place",
-        noOfLikes: 30,
-        isLiked: false),
-    Comment(
-        imageUrl: "assets/images/profile3.png",
-        userName: "thanos",
-        comment: "Great",
-        noOfLikes: 20,
-        isLiked: false),
-    Comment(
-        imageUrl: "assets/images/profile4.png",
-        userName: "iamraj",
-        comment: "Wow, beautiful place",
-        noOfLikes: 10,
-        isLiked: false),
-  ];
-
   final PageController _controller = PageController(viewportFraction: 1);
   bool isLiked = false;
   bool isSaved = false;
   bool isShared = false;
-  TextEditingController _textEditingController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
-
-  void _scrollToBottom() {
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
-      duration: Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-    );
-  }
-
-  void addComment() {
-    if (_textEditingController.text != '') {
-      setState(() {
-        _commentList.add(Comment(
-            imageUrl: "assets/images/profile4.png",
-            userName: "iamaswin",
-            comment: _textEditingController.text,
-            noOfLikes: 0,
-            isLiked: false));
-      });
-      _textEditingController.text = '';
-      FocusScope.of(context).unfocus();
-      _scrollToBottom();
-    }
-  }
-
-  void showBottomDrawer(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(10.r),
-                  topRight: Radius.circular(10.r)),
-              color: const Color(0xFF101010)),
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              Text(
-                'Comments',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 16.0),
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  itemCount: _commentList.length,
-                  itemBuilder: ((BuildContext context, int index) {
-                    Comment _comment = _commentList[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: AssetImage(_comment.imageUrl),
-                        radius: 20.r,
-                      ),
-                      title: Text("@${_comment.userName}"),
-                      subtitle: Text(_comment.comment),
-                      trailing: Column(
-                        children: [
-                          GestureDetector(
-                            onTap:   () {
-                              setState(() {
-                                _commentList[index].isLiked = true;
-                                _commentList[index].noOfLikes++;
-                              });
-                            },
-                            child: Icon(_comment.isLiked
-                                  ? CupertinoIcons.heart_fill
-                                  : CupertinoIcons.heart,
-                                  color: Colors.white,
-                                  size: 20.h,),
-                          ),
-                          
-                          Text("${_comment.noOfLikes}")
-                        ],
-                      ),
-                    );
-                  }),
-                ),
-              ),
-              Container(
-                height: 50.h,
-                width: 350.w,
-                padding: EdgeInsets.symmetric(horizontal: 10.w),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.white, width: 1.h),
-                  borderRadius: BorderRadius.circular(25.r),
-                  color: const Color(0xFF101010),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        maxLengthEnforcement: MaxLengthEnforcement.none,
-                        controller: _textEditingController,
-                        onSubmitted: (val) {
-                          addComment();
-                        },
-                        decoration: InputDecoration(
-                            hintText: 'Add a comment...',
-                            hintStyle: GoogleFonts.roboto(
-                                fontSize: 15.sp,
-                                color: const Color(0xFFB6B7B8),
-                                fontWeight: FontWeight.bold),
-                            border: const OutlineInputBorder(
-                              borderSide:
-                                  BorderSide(color: Color.fromRGBO(0, 0, 0, 0)),
-                            ),
-                            enabledBorder: const OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.transparent)),
-                            focusedBorder: const OutlineInputBorder(
-                                borderSide:
-                                    BorderSide(color: Colors.transparent))),
-                      ),
-                    ),
-                    SizedBox(
-                      width: 5.w,
-                    ),
-                    VerticalDivider(
-                      color: const Color(0xFFB6B7B8),
-                      width: 1.h,
-                    ),
-                    SizedBox(
-                      width: 5.w,
-                    ),
-                    IconButton(
-                        onPressed: () {
-                          addComment();
-                        },
-                        icon: Icon(
-                          Icons.send_outlined,
-                          size: 20.h,
-                          color: const Color(0xFF491BBA),
-                        ))
-                  ],
-                ),
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -323,7 +146,14 @@ class _HomeState extends State<Home> {
                                         ),
                                         GestureDetector(
                                             onTap: () {
-                                              showBottomDrawer(context);
+                                              showModalBottomSheet(
+                                                  context: context,
+                                                  backgroundColor:
+                                                      Colors.transparent,
+                                                  builder:
+                                                      (BuildContext context) {
+                                                    return CommentSection();
+                                                  });
                                             },
                                             child: Image.asset(
                                               "assets/icons/comment.png",
@@ -501,6 +331,192 @@ class Comment {
       {required this.imageUrl,
       required this.userName,
       required this.comment,
-      required this.noOfLikes,
-      required this.isLiked});
+      this.noOfLikes = 0,
+      this.isLiked = false});
+}
+
+class CommentSection extends StatefulWidget {
+  const CommentSection({super.key});
+
+  @override
+  State<CommentSection> createState() => _CommentSectionState();
+}
+
+class _CommentSectionState extends State<CommentSection> {
+  final List<Comment> _commentList = <Comment>[
+    Comment(
+      imageUrl: "assets/images/profile1.png",
+      userName: "iamraj",
+      comment: "Wow nice!",
+      noOfLikes: 10,
+    ),
+    Comment(
+      imageUrl: "assets/images/profile2.png",
+      userName: "iamkumar",
+      comment: "It's a nice place",
+      noOfLikes: 30,
+    ),
+    Comment(
+      imageUrl: "assets/images/profile3.png",
+      userName: "thanos",
+      comment: "Great",
+      noOfLikes: 20,
+    ),
+    Comment(
+      imageUrl: "assets/images/profile4.png",
+      userName: "iamraj",
+      comment: "Wow, beautiful place",
+      noOfLikes: 10,
+    ),
+  ];
+
+  TextEditingController _textEditingController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  void addComment() {
+    if (_textEditingController.text != '') {
+      setState(() {
+        _commentList.add(Comment(
+            imageUrl: "assets/images/profile4.png",
+            userName: "iamaswin",
+            comment: _textEditingController.text,
+            noOfLikes: 0,
+            isLiked: false));
+      });
+      _textEditingController.text = '';
+      FocusScope.of(context).unfocus();
+      _scrollToBottom();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(10.r), topRight: Radius.circular(10.r)),
+          color: const Color(0xFF101010)),
+      padding: EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          Text(
+            'Comments',
+            style: TextStyle(
+              fontSize: 18.0,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 16.0),
+          Expanded(
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: _commentList.length,
+              itemBuilder: ((BuildContext context, int index) {
+                Comment _comment = _commentList[index];
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundImage: AssetImage(_comment.imageUrl),
+                    radius: 20.r,
+                  ),
+                  title: Text("@${_comment.userName}"),
+                  subtitle: Text(_comment.comment),
+                  trailing: Column(
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            if (_commentList[index].isLiked) {
+                              _commentList[index].noOfLikes--;
+                            } else {
+                              _commentList[index].noOfLikes++;
+                            }
+                            _commentList[index].isLiked =
+                                !_commentList[index].isLiked;
+                            
+                          });
+                        },
+                        child: Icon(
+                          _comment.isLiked
+                              ? CupertinoIcons.heart_fill
+                              : CupertinoIcons.heart,
+                          color: Colors.white,
+                          size: 20.h,
+                        ),
+                      ),
+                      Text("${_comment.noOfLikes}")
+                    ],
+                  ),
+                );
+              }),
+            ),
+          ),
+          Container(
+            height: 50.h,
+            width: 350.w,
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.white, width: 1.h),
+              borderRadius: BorderRadius.circular(25.r),
+              color: const Color(0xFF101010),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Expanded(
+                  child: TextField(
+                    maxLengthEnforcement: MaxLengthEnforcement.none,
+                    controller: _textEditingController,
+                    onSubmitted: (val) {
+                      addComment();
+                    },
+                    decoration: InputDecoration(
+                        hintText: 'Add a comment...',
+                        hintStyle: GoogleFonts.roboto(
+                            fontSize: 15.sp,
+                            color: const Color(0xFFB6B7B8),
+                            fontWeight: FontWeight.bold),
+                        border: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Color.fromRGBO(0, 0, 0, 0)),
+                        ),
+                        enabledBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.transparent)),
+                        focusedBorder: const OutlineInputBorder(
+                            borderSide: BorderSide(color: Colors.transparent))),
+                  ),
+                ),
+                SizedBox(
+                  width: 5.w,
+                ),
+                VerticalDivider(
+                  color: const Color(0xFFB6B7B8),
+                  width: 1.h,
+                ),
+                SizedBox(
+                  width: 5.w,
+                ),
+                IconButton(
+                    onPressed: () {
+                      addComment();
+                    },
+                    icon: Icon(
+                      Icons.send_outlined,
+                      size: 20.h,
+                      color: const Color(0xFF491BBA),
+                    ))
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
 }
