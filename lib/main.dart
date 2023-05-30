@@ -6,6 +6,7 @@ import 'package:netteam/screens/ForgotPassword.dart';
 import 'package:netteam/screens/Home.dart';
 import 'package:netteam/screens/Interests.dart';
 import 'package:netteam/screens/Live.dart';
+import 'package:netteam/screens/Profile.dart';
 import 'package:netteam/screens/ResetPassword.dart';
 import 'package:netteam/screens/Verify.dart';
 import 'package:netteam/screens/Video15.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
       designSize: const Size(375, 812),
       minTextAdapt: true,
       splitScreenMode: true,
-      builder: (context , child) {
+      builder: (context, child) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'NetTeam',
@@ -38,27 +39,27 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             textTheme: Typography.englishLike2018.apply(fontSizeFactor: 1.sp),
           ),
-          initialRoute: "/splash",
+          initialRoute: "/profile",
           routes: {
             "/splash": (context) => const SplashScreen(),
             "/": (context) => const Home(),
-            "/login" : (context) => const Login(),
-            "/signup" : (context) => const SignUp(),
-            "/forgotpassword" : (context) => const ForgotPassword(),
-            "/verify" : (context) => const Verify(),
-            "/resetpassword": (context) => const  ResetPassword(),
-            "/interests" : (context) => const Interests(),
-            "/videocall" : (context) => const VideoCall(),
-            "/videoset" : (context) => const VideoSet(),
+            "/login": (context) => const Login(),
+            "/signup": (context) => const SignUp(),
+            "/forgotpassword": (context) => const ForgotPassword(),
+            "/verify": (context) => const Verify(),
+            "/resetpassword": (context) => const ResetPassword(),
+            "/interests": (context) => const Interests(),
+            "/videocall": (context) => const VideoCall(),
+            "/videoset": (context) => const VideoSet(),
             "/chat": (context) => const Chat(),
             "/live": (context) => const Live(),
             "/video15": (context) => const Video15(),
             "/video30": (context) => const Video30(),
-            "/chatlist" : (context) => const ChatList(),
+            "/chatlist": (context) => const ChatList(),
+            "/profile" : (context) => const Profile()
           },
         );
       },
     );
   }
 }
-
