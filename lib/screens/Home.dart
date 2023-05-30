@@ -311,6 +311,7 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to Account section
+                    Navigator.pushNamed(context, "/profile");
                   },
                 ),
               ],
@@ -440,7 +441,6 @@ class _CommentSectionState extends State<CommentSection> {
                             }
                             _commentList[index].isLiked =
                                 !_commentList[index].isLiked;
-                            
                           });
                         },
                         child: Icon(

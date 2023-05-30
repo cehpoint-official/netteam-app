@@ -121,6 +121,7 @@ class _ChatListState extends State<ChatList> {
                         size: 30.h, color: const Color(0xFFFFFFFF))),
                 onTap: () {
                   //Navigate to Account section
+                  Navigator.pushNamed(context, "/profile");
                 },
               ),
             ],
