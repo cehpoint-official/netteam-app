@@ -579,61 +579,132 @@ class _BodyState extends State<Body> {
                             top: BorderSide(
                           color: Color(0xFF5F5D5D),
                         ))),
-                    height: 70.h,
                     padding:
                         EdgeInsets.symmetric(horizontal: 30.w, vertical: 10.h),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              "Silver",
-                              style: GoogleFonts.roboto(
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  fontSize: 18.sp),
-                            ),
-                            SizedBox(
-                              height: 10.h,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "\$99",
+                                  "Silver",
                                   style: GoogleFonts.roboto(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14.sp,
-                                      color: const Color(0xFFAEAEAE)),
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      fontSize: 18.sp),
                                 ),
-                                Text(
-                                  "/month",
-                                  style: GoogleFonts.roboto(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 12.sp,
-                                      color: const Color(0xFFAEAEAE)),
+                                SizedBox(
+                                  height: 10.h,
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "\$99",
+                                      style: GoogleFonts.roboto(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14.sp,
+                                          color: const Color(0xFFAEAEAE)),
+                                    ),
+                                    Text(
+                                      "/month",
+                                      style: GoogleFonts.roboto(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 12.sp,
+                                          color: const Color(0xFFAEAEAE)),
+                                    )
+                                  ],
                                 )
                               ],
+                            ),
+                            SizedBox(
+                              height: 25.h,
+                              width: 65.w,
+                              child: ElevatedButton(
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all(
+                                              const Color(0xFF480BF5))),
+                                  onPressed: () {},
+                                  child: Text(
+                                    "Buy",
+                                    style: GoogleFonts.roboto(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
+                                  )),
                             )
                           ],
                         ),
                         SizedBox(
-                          height: 25.h,
-                          width: 65.w,
-                          child: ElevatedButton(
-                              style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(
-                                      const Color(0xFF480BF5))),
-                              onPressed: () {},
-                              child: Text(
-                                "Buy",
-                                style: GoogleFonts.roboto(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )),
+                          height: 10.h,
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 8.h,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Text(
+                              "Feature 1",
+                              style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 14.sp,
+                                  color: Colors.white),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 4.h,
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 8.h,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Text(
+                              "Feature 2",
+                              style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 14.sp,
+                                  color: Colors.white),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 4.h,
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 8.h,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Text(
+                              "Feature 3",
+                              style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 14.sp,
+                                  color: Colors.white),
+                            )
+                          ],
                         )
                       ],
                     ),
@@ -645,61 +716,131 @@ class _BodyState extends State<Body> {
                             top: BorderSide(
                           color: Color(0xFF5F5D5D),
                         ))),
-                    height: 70.h,
                     padding:
                         EdgeInsets.symmetric(horizontal: 30.w, vertical: 10.h),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              "Gold",
-                              style: GoogleFonts.roboto(
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  fontSize: 18.sp),
-                            ),
-                            SizedBox(
-                              height: 10.h,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "\$149",
+                                  "Gold",
                                   style: GoogleFonts.roboto(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14.sp,
-                                      color: const Color(0xFFAEAEAE)),
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      fontSize: 18.sp),
                                 ),
-                                Text(
-                                  "/month",
-                                  style: GoogleFonts.roboto(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 12.sp,
-                                      color: const Color(0xFFAEAEAE)),
+                                SizedBox(
+                                  height: 10.h,
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "\$149",
+                                      style: GoogleFonts.roboto(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14.sp,
+                                          color: const Color(0xFFAEAEAE)),
+                                    ),
+                                    Text(
+                                      "/month",
+                                      style: GoogleFonts.roboto(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 12.sp,
+                                          color: const Color(0xFFAEAEAE)),
+                                    )
+                                  ],
                                 )
                               ],
+                            ),
+                            SizedBox(
+                              height: 25.h,
+                              width: 65.w,
+                              child: ElevatedButton(
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all(
+                                              const Color(0xFF480BF5))),
+                                  onPressed: () {},
+                                  child: Text(
+                                    "Buy",
+                                    style: GoogleFonts.roboto(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
+                                  )),
                             )
                           ],
                         ),
                         SizedBox(
-                          height: 25.h,
-                          width: 65.w,
-                          child: ElevatedButton(
-                              style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(
-                                      const Color(0xFF480BF5))),
-                              onPressed: () {},
-                              child: Text(
-                                "Buy",
-                                style: GoogleFonts.roboto(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )),
+                          height: 10.h,
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 8.h,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Text(
+                              "Feature 1",
+                              style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 14.sp,
+                                  color: Colors.white),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 4.h,
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 8.h,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Text(
+                              "Feature 2",
+                              style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 14.sp,
+                                  color: Colors.white),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 4.h,
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 8.h,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Text(
+                              "Feature 3",
+                              style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 14.sp,
+                                  color: Colors.white),
+                            )
+                          ],
                         )
                       ],
                     ),
@@ -712,75 +853,135 @@ class _BodyState extends State<Body> {
                               color: Color(0xFF5F5D5D),
                             ),
                             bottom: BorderSide(color: Color(0xFF5F5D5D)))),
-                    height: 70.h,
                     padding:
                         EdgeInsets.symmetric(horizontal: 30.w, vertical: 10.h),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text(
-                              "Platinum",
-                              style: GoogleFonts.roboto(
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  fontSize: 18.sp),
-                            ),
-                            SizedBox(
-                              height: 10.h,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "\$199",
+                                  "Platinum",
                                   style: GoogleFonts.roboto(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 14.sp,
-                                      color: const Color(0xFFAEAEAE)),
+                                      fontWeight: FontWeight.w800,
+                                      color: Colors.white,
+                                      fontSize: 18.sp),
                                 ),
-                                Text(
-                                  "/month",
-                                  style: GoogleFonts.roboto(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 12.sp,
-                                      color: const Color(0xFFAEAEAE)),
+                                SizedBox(
+                                  height: 10.h,
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      "\$199",
+                                      style: GoogleFonts.roboto(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 14.sp,
+                                          color: const Color(0xFFAEAEAE)),
+                                    ),
+                                    Text(
+                                      "/month",
+                                      style: GoogleFonts.roboto(
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 12.sp,
+                                          color: const Color(0xFFAEAEAE)),
+                                    )
+                                  ],
                                 )
                               ],
+                            ),
+                            SizedBox(
+                              height: 25.h,
+                              width: 65.w,
+                              child: ElevatedButton(
+                                  style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all(
+                                              const Color(0xFF480BF5))),
+                                  onPressed: () {},
+                                  child: Text(
+                                    "Buy",
+                                    style: GoogleFonts.roboto(
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white),
+                                  )),
                             )
                           ],
                         ),
                         SizedBox(
-                          height: 25.h,
-                          width: 65.w,
-                          child: ElevatedButton(
-                              style: ButtonStyle(
-                                  backgroundColor: MaterialStateProperty.all(
-                                      const Color(0xFF480BF5))),
-                              onPressed: () {},
-                              child: Text(
-                                "Buy",
-                                style: GoogleFonts.roboto(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white),
-                              )),
+                          height: 10.h,
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 8.h,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Text(
+                              "Feature 1",
+                              style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 14.sp,
+                                  color: Colors.white),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 4.h,
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 8.h,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Text(
+                              "Feature 2",
+                              style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 14.sp,
+                                  color: Colors.white),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                          height: 4.h,
+                        ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              size: 8.h,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 5.w,
+                            ),
+                            Text(
+                              "Feature 3",
+                              style: GoogleFonts.roboto(
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 14.sp,
+                                  color: Colors.white),
+                            )
+                          ],
                         )
                       ],
                     ),
                   ),
-                  SizedBox(height: 20.h,),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 24.h, vertical: 10.h),
-                    child: Text("Information about Premium Plans \n Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce varius lectus id leo bibendum ultrices. Sed condimentum consequat justo, in vulputate leo bibendum vitae. Quisque lobortis, risus sed placerat tincidunt, eros lorem dictum est, eu tincidunt sapien leo id velit. Vestibulum malesuada placerat tellus, vitae feugiat odio.",
-                    style: GoogleFonts.roboto(
-                      fontWeight: FontWeight.normal,
-                      fontSize: 12.sp,
-                      color: Colors.white
-                    ),),
-                  )
                 ],
               ),
             )
