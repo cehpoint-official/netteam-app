@@ -631,7 +631,7 @@ class _BodyState extends State<Body> {
                                               const Color(0xFF480BF5))),
                                   onPressed: () {},
                                   child: Text(
-                                    "Buy",
+                                    "View",
                                     style: GoogleFonts.roboto(
                                         fontSize: 15.sp,
                                         fontWeight: FontWeight.bold,
@@ -767,7 +767,7 @@ class _BodyState extends State<Body> {
                                               const Color(0xFF480BF5))),
                                   onPressed: () {},
                                   child: Text(
-                                    "Buy",
+                                    "View",
                                     style: GoogleFonts.roboto(
                                         fontSize: 15.sp,
                                         fontWeight: FontWeight.bold,
@@ -904,7 +904,7 @@ class _BodyState extends State<Body> {
                                               const Color(0xFF480BF5))),
                                   onPressed: () {},
                                   child: Text(
-                                    "Buy",
+                                    "View",
                                     style: GoogleFonts.roboto(
                                         fontSize: 15.sp,
                                         fontWeight: FontWeight.bold,
