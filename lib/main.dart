@@ -6,6 +6,7 @@ import 'package:netteam/screens/ForgotPassword.dart';
 import 'package:netteam/screens/Home.dart';
 import 'package:netteam/screens/Interests.dart';
 import 'package:netteam/screens/Live.dart';
+import 'package:netteam/screens/PricingPlans.dart';
 import 'package:netteam/screens/Profile.dart';
 import 'package:netteam/screens/ResetPassword.dart';
 import 'package:netteam/screens/Verify.dart';
@@ -56,7 +57,8 @@ class MyApp extends StatelessWidget {
             "/video15": (context) => const Video15(),
             "/video30": (context) => const Video30(),
             "/chatlist": (context) => const ChatList(),
-            "/profile" : (context) => const Profile()
+            "/profile" : (context) => const Profile(),
+            "/pricingplans": (context) =>  PricingPlans()
           },
         );
       },

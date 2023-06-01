@@ -623,13 +623,17 @@ class _BodyState extends State<Body> {
                             ),
                             SizedBox(
                               height: 25.h,
-                              width: 65.w,
+                              width: 70.w,
                               child: ElevatedButton(
                                   style: ButtonStyle(
                                       backgroundColor:
                                           MaterialStateProperty.all(
                                               const Color(0xFF480BF5))),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, "/pricingplans",
+                                        arguments: 0);
+                                  },
                                   child: Text(
                                     "View",
                                     style: GoogleFonts.roboto(
@@ -759,13 +763,17 @@ class _BodyState extends State<Body> {
                             ),
                             SizedBox(
                               height: 25.h,
-                              width: 65.w,
+                              width: 70.w,
                               child: ElevatedButton(
                                   style: ButtonStyle(
                                       backgroundColor:
                                           MaterialStateProperty.all(
                                               const Color(0xFF480BF5))),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, "/pricingplans",
+                                        arguments: 1);
+                                  },
                                   child: Text(
                                     "View",
                                     style: GoogleFonts.roboto(
@@ -896,13 +904,17 @@ class _BodyState extends State<Body> {
                             ),
                             SizedBox(
                               height: 25.h,
-                              width: 65.w,
+                              width: 70.w,
                               child: ElevatedButton(
                                   style: ButtonStyle(
                                       backgroundColor:
                                           MaterialStateProperty.all(
                                               const Color(0xFF480BF5))),
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, "/pricingplans",
+                                        arguments: 2);
+                                  },
                                   child: Text(
                                     "View",
                                     style: GoogleFonts.roboto(
