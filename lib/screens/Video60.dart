@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:netteam/screens/Chat.dart';
 
-//Argument should be true if its 15s else false
-
-class Video30 extends StatefulWidget {
-  const Video30({super.key});
+class Video60 extends StatefulWidget {
+  const Video60({super.key});
 
   @override
-  State<Video30> createState() => _Video30State();
+  State<Video60> createState() => _Video60State();
 }
 
-class _Video30State extends State<Video30> {
+class _Video60State extends State<Video60> {
   bool isBeautyOn = false;
 
   int timer = 0;
@@ -337,7 +331,7 @@ class _Video30State extends State<Video30> {
                 child: Column(
                   children: [
                     Text(
-                      "30s",
+                      "60s",
                       style: GoogleFonts.roboto(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
@@ -351,6 +345,22 @@ class _Video30State extends State<Video30> {
                   ],
                 ),
               ),
+              SizedBox(width: 30.w),
+              GestureDetector(
+                  onTap: () {
+                    //Argument should be true if its 15s else false
+                    Navigator.pushNamed(
+                      context,
+                      "/video3m",
+                    );
+                  },
+                  child: Text(
+                    "3m",
+                    style: GoogleFonts.roboto(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey),
+                  )),
               SizedBox(width: 30.w),
               GestureDetector(
                   onTap: () {

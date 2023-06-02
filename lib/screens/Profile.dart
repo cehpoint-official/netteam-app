@@ -15,15 +15,6 @@ class Profile extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           backgroundColor: const Color(0xFF0E0B1F),
-          title: Text(
-            "Profile",
-            style: GoogleFonts.nunito(
-              fontSize: 36.sp,
-              color: Colors.white,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          automaticallyImplyLeading: false,
           elevation: 0.0,
         ),
         backgroundColor: const Color(0xFF0E0B1F),

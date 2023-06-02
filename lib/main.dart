@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:netteam/screens/AboutYou.dart';
 import 'package:netteam/screens/Chat.dart';
 import 'package:netteam/screens/Chatlist.dart';
 import 'package:netteam/screens/ForgotPassword.dart';
@@ -11,7 +12,8 @@ import 'package:netteam/screens/Profile.dart';
 import 'package:netteam/screens/ResetPassword.dart';
 import 'package:netteam/screens/Verify.dart';
 import 'package:netteam/screens/Video15.dart';
-import 'package:netteam/screens/Video30.dart';
+import 'package:netteam/screens/Video3m.dart';
+import 'package:netteam/screens/Video60.dart';
 import 'package:netteam/screens/VideoSet.dart';
 import 'package:netteam/screens/login.dart';
 import 'package:netteam/screens/signup.dart';
@@ -55,10 +57,12 @@ class MyApp extends StatelessWidget {
             "/chat": (context) => const Chat(),
             "/live": (context) => const Live(),
             "/video15": (context) => const Video15(),
-            "/video30": (context) => const Video30(),
+            "/video60": (context) => const Video60(),
+            "/video3m" : (context) => const Video3m(),
             "/chatlist": (context) => const ChatList(),
             "/profile" : (context) => const Profile(),
-            "/pricingplans": (context) =>  PricingPlans()
+            "/pricingplans": (context) =>  PricingPlans(),
+            "/aboutyou" : (context) => const AboutYou(),
           },
         );
       },

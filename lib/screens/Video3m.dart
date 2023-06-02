@@ -1,21 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:netteam/screens/Chat.dart';
 
-//Argument should be true if its 15s else false
-
-class Video15 extends StatefulWidget {
-  const Video15({super.key});
+class Video3m extends StatefulWidget {
+  const Video3m({super.key});
 
   @override
-  State<Video15> createState() => _Video15State();
+  State<Video3m> createState() => _Video3mState();
 }
 
-class _Video15State extends State<Video15> {
+class _Video3mState extends State<Video3m> {
   bool isBeautyOn = false;
 
   int timer = 0;
@@ -37,7 +31,6 @@ class _Video15State extends State<Video15> {
             fit: BoxFit.cover,
           ), //Should make this into camera video
           Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SizedBox(
@@ -75,7 +68,7 @@ class _Video15State extends State<Video15> {
                           children: [
                             IconButton(
                                 onPressed: () {},
-                                icon: Icon(
+                                icon: const Icon(
                                   Icons.music_note_outlined,
                                   color: Colors.white,
                                 )),
@@ -317,11 +310,41 @@ class _Video15State extends State<Video15> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Navigator.pushNamed(context, "/video15");
+                },
                 child: Column(
                   children: [
                     Text(
                       "15s",
+                      style: GoogleFonts.roboto(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 30.w),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, "/video60");
+                },
+                child: Text(
+                  "60s",
+                  style: GoogleFonts.roboto(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey),
+                ),
+              ),
+              SizedBox(width: 30.w),
+              GestureDetector(
+                onTap: () {},
+                child: Column(
+                  children: [
+                    Text(
+                      "3m",
                       style: GoogleFonts.roboto(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
@@ -335,39 +358,6 @@ class _Video15State extends State<Video15> {
                   ],
                 ),
               ),
-              SizedBox(width: 30.w),
-              GestureDetector(
-                onTap: () {
-                  Navigator.pushNamed(context, "/video60");
-                },
-                child: Column(
-                  children: [
-                    Text(
-                      "60s",
-                      style: GoogleFonts.roboto(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: 30.w),
-              GestureDetector(
-                  onTap: () {
-                    //Argument should be true if its 15s else false
-                    Navigator.pushNamed(
-                      context,
-                      "/video3m",
-                    );
-                  },
-                  child: Text(
-                    "3m",
-                    style: GoogleFonts.roboto(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.grey),
-                  )),
               SizedBox(width: 30.w),
               GestureDetector(
                   onTap: () {
@@ -385,5 +375,6 @@ class _Video15State extends State<Video15> {
         ),
       ),
     );
+    ;
   }
 }
