@@ -218,6 +218,8 @@ class _NormalCallState extends State<NormalCall> {
                             GestureDetector(
                               onTap: () {
                                 //Handle Chat Request
+                                //Once after the other user accepts the request, chat should be linked
+                                Navigator.pushNamed(context, "/chat");
                               },
                               child: SvgPicture.asset(
                                 "assets/images/chatRequest.svg",
