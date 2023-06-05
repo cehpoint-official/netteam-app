@@ -15,6 +15,7 @@ import 'package:netteam/screens/Video15.dart';
 import 'package:netteam/screens/Video3m.dart';
 import 'package:netteam/screens/Video60.dart';
 import 'package:netteam/screens/VideoSet.dart';
+import 'package:netteam/screens/create.dart';
 import 'package:netteam/screens/login.dart';
 import 'package:netteam/screens/signup.dart';
 import 'package:netteam/screens/splashscreen.dart';
@@ -63,6 +64,7 @@ class MyApp extends StatelessWidget {
             "/profile" : (context) => const Profile(),
             "/pricingplans": (context) =>  PricingPlans(),
             "/aboutyou" : (context) => const AboutYou(),
+            "/create" : (context) => const Create()
           },
         );
       },

@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/framework.dart';
@@ -62,514 +63,382 @@ class _LiveState extends State<Live> {
     "assets/icons/timer3.png",
     "assets/icons/Timer5.png"
   ];
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-          child: Stack(
-        children: [
-          Image.asset(
-            "assets/images/selfie.jpg",
-            width: 375.w,
-            height: 812.h,
-            fit: BoxFit.cover,
-          ), //Should make this into camera video
-          SizedBox(
-            width: 375.w,
-            height: 800.h,
-            child: PageView.builder(
-                scrollDirection: Axis.horizontal,
-                pageSnapping: true,
-                itemCount: 3,
-                itemBuilder: (BuildContext context, int index) {
-                  return SingleChildScrollView(
-                    scrollDirection: Axis.vertical,
-                    child: SizedBox(
-                      height: 760.h,
+    return SafeArea(
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: SizedBox(
+          height: 760.h,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                  width: 375.w,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      isLive
+                          ? Container(
+                              margin: EdgeInsets.all(5.h),
+                              height: 30.h,
+                              width: 100.w,
+                              child: ElevatedButton(
+                                style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all(Colors.red)),
+                                child: Text(
+                                  'End Live',
+                                  style: GoogleFonts.roboto(
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                onPressed: () {
+                                  Navigator.pushNamed(context, "/");
+                                },
+                              ),
+                            )
+                          : Container(
+                              decoration: BoxDecoration(boxShadow: [
+                                BoxShadow(
+                                    color: Color.fromRGBO(0, 0, 0, 0.5),
+                                    blurRadius: 50.r,
+                                    offset: Offset(0, 0.33))
+                              ]),
+                              child: IconButton(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  icon: Icon(
+                                    Icons.close,
+                                    size: 25.h,
+                                    color: Colors.white,
+                                  )),
+                            ),
+                      Container(
+                        decoration: BoxDecoration(boxShadow: [
+                          BoxShadow(
+                              color: Color.fromRGBO(0, 0, 0, 0.5),
+                              blurRadius: 70.r,
+                              offset: Offset(0, 0.33))
+                        ]),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Column(
+                              children: [
+                                IconButton(
+                                    onPressed: () async {
+                                      //Changing the Camera
+                                    },
+                                    icon: Icon(
+                                        Icons.flip_camera_android_outlined,
+                                        size: 25.h,
+                                        color: Colors.white)),
+                                Text(
+                                  "Flip",
+                                  style: GoogleFonts.roboto(
+                                      fontSize: 15.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500),
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 18.h,
+                            ),
+                            Column(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      isBeautyOn = !isBeautyOn;
+                                    });
+                                  },
+                                  child: Image.asset(
+                                    (isBeautyOn)
+                                        ? "assets/icons/BeautyOn.png"
+                                        : "assets/icons/BeautyOff.png",
+                                    height: 20.h,
+                                    width: 20.h,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5.h,
+                                ),
+                                Text(
+                                  "Beauty",
+                                  style: GoogleFonts.roboto(
+                                      fontSize: 15.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500),
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 18.h,
+                            ),
+                            Column(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {},
+                                  child: Image.asset(
+                                    "assets/icons/Filters.png",
+                                    height: 20.h,
+                                    width: 20.h,
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 5.h,
+                                ),
+                                Text(
+                                  "Filters",
+                                  style: GoogleFonts.roboto(
+                                      fontSize: 15.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500),
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 18.h,
+                            ),
+                            Column(
+                              children: [
+                                (timer == 0)
+                                    ? IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            timer++;
+                                          });
+                                        },
+                                        icon: Icon(
+                                          Icons.timer_off_outlined,
+                                          size: 25.h,
+                                          color: Colors.white,
+                                        ))
+                                    : GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            if (timer != 2) {
+                                              timer++;
+                                            } else {
+                                              timer = 0;
+                                            }
+                                          });
+                                        },
+                                        child: Image.asset(
+                                          _iconPath[timer - 1],
+                                          height: 20.h,
+                                          width: 20.h,
+                                        ),
+                                      ),
+                                SizedBox(
+                                  height: (timer == 0) ? 0 : 5.h,
+                                ),
+                                Text(
+                                  "Timer",
+                                  style: GoogleFonts.roboto(
+                                      fontSize: 15.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500),
+                                )
+                              ],
+                            ),
+                            SizedBox(
+                              height: 10.h,
+                            ),
+                            Column(
+                              children: [
+                                IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(
+                                      Icons.flash_off_sharp,
+                                      color: Colors.white,
+                                      size: 25.h,
+                                    )),
+                                Text(
+                                  "Flash",
+                                  style: GoogleFonts.roboto(
+                                      fontSize: 15.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w500),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
+                      )
+                    ],
+                  )),
+              isLive
+                  ? SizedBox(
+                      height: 200.h,
+                      width: 375.w,
+                      //color: Colors.amber,
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SizedBox(
-                              width: 375.w,
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  isLive
-                                      ? Container(
-                                          margin: EdgeInsets.all(5.h),
-                                          height: 30.h,
-                                          width: 100.w,
-                                          child: ElevatedButton(
-                                            style: ButtonStyle(
-                                                backgroundColor:
-                                                    MaterialStateProperty.all(
-                                                        Colors.red)),
-                                            child: Text(
-                                              'End Live',
-                                              style: GoogleFonts.roboto(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            onPressed: () {
-                                              Navigator.pushNamed(context, "/");
-                                            },
-                                          ),
-                                        )
-                                      : Container(
-                                          decoration: BoxDecoration(boxShadow: [
-                                            BoxShadow(
-                                                color: Color.fromRGBO(
-                                                    0, 0, 0, 0.5),
-                                                blurRadius: 50.r,
-                                                offset: Offset(0, 0.33))
-                                          ]),
-                                          child: IconButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              icon: Icon(
-                                                Icons.close,
-                                                size: 25.h,
-                                                color: Colors.white,
-                                              )),
-                                        ),
-                                  Container(
-                                    decoration: BoxDecoration(boxShadow: [
-                                      BoxShadow(
-                                          color: Color.fromRGBO(0, 0, 0, 0.5),
-                                          blurRadius: 70.r,
-                                          offset: Offset(0, 0.33))
-                                    ]),
-                                    child: Column(
+                          Align(
+                            alignment: Alignment.bottomLeft,
+                            child: ListView.builder(
+                              controller: _scrollController,
+                              itemCount: _chatList.length,
+                              shrinkWrap: true,
+                              itemBuilder: (BuildContext context, int index) {
+                                LiveChat message = _chatList[index];
+                                return Padding(
+                                  padding: EdgeInsets.all(5.h),
+                                  child: Container(
+                                    child: Row(
                                       mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Column(
-                                          children: [
-                                            IconButton(
-                                                onPressed: () {},
-                                                icon: Icon(
-                                                    Icons
-                                                        .flip_camera_android_outlined,
-                                                    size: 25.h,
-                                                    color: Colors.white)),
-                                            Text(
-                                              "Flip",
-                                              style: GoogleFonts.roboto(
-                                                  fontSize: 15.sp,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500),
-                                            )
-                                          ],
+                                        SizedBox(
+                                          height: 40.h,
+                                          child: CircleAvatar(
+                                            radius: 20.r,
+                                            backgroundImage: AssetImage(
+                                              message.imageUrl,
+                                            ),
+                                          ),
                                         ),
                                         SizedBox(
-                                          height: 18.h,
+                                          width: 10.w,
                                         ),
                                         Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
-                                            GestureDetector(
-                                              onTap: () {
-                                                setState(() {
-                                                  isBeautyOn = !isBeautyOn;
-                                                });
-                                              },
-                                              child: Image.asset(
-                                                (isBeautyOn)
-                                                    ? "assets/icons/BeautyOn.png"
-                                                    : "assets/icons/BeautyOff.png",
-                                                height: 20.h,
-                                                width: 20.h,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 5.h,
-                                            ),
                                             Text(
-                                              "Beauty",
+                                              "@${message.userName}",
                                               style: GoogleFonts.roboto(
                                                   fontSize: 15.sp,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500),
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 18.h,
-                                        ),
-                                        Column(
-                                          children: [
-                                            GestureDetector(
-                                              onTap: () {},
-                                              child: Image.asset(
-                                                "assets/icons/Filters.png",
-                                                height: 20.h,
-                                                width: 20.h,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: 5.h,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white),
                                             ),
                                             Text(
-                                              "Filters",
+                                              "${message.chat}",
                                               style: GoogleFonts.roboto(
-                                                  fontSize: 15.sp,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500),
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 18.h,
-                                        ),
-                                        Column(
-                                          children: [
-                                            (timer == 0)
-                                                ? IconButton(
-                                                    onPressed: () {
-                                                      setState(() {
-                                                        timer++;
-                                                      });
-                                                    },
-                                                    icon: Icon(
-                                                      Icons.timer_off_outlined,
-                                                      size: 25.h,
-                                                      color: Colors.white,
-                                                    ))
-                                                : GestureDetector(
-                                                    onTap: () {
-                                                      setState(() {
-                                                        if (timer != 2) {
-                                                          timer++;
-                                                        } else {
-                                                          timer = 0;
-                                                        }
-                                                      });
-                                                    },
-                                                    child: Image.asset(
-                                                      _iconPath[timer - 1],
-                                                      height: 20.h,
-                                                      width: 20.h,
-                                                    ),
-                                                  ),
-                                            SizedBox(
-                                              height: (timer == 0) ? 0 : 5.h,
-                                            ),
-                                            Text(
-                                              "Timer",
-                                              style: GoogleFonts.roboto(
-                                                  fontSize: 15.sp,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500),
-                                            )
-                                          ],
-                                        ),
-                                        SizedBox(
-                                          height: 10.h,
-                                        ),
-                                        Column(
-                                          children: [
-                                            IconButton(
-                                                onPressed: () {},
-                                                icon: Icon(
-                                                  Icons.flash_off_sharp,
-                                                  color: Colors.white,
-                                                  size: 25.h,
-                                                )),
-                                            Text(
-                                              "Flash",
-                                              style: GoogleFonts.roboto(
-                                                  fontSize: 15.sp,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w500),
+                                                  fontSize: 12.sp,
+                                                  fontWeight: FontWeight.normal,
+                                                  color: Colors.white),
                                             )
                                           ],
                                         )
                                       ],
                                     ),
-                                  )
-                                ],
-                              )),
-                          isLive
-                              ? SizedBox(
-                                  height: 200.h,
-                                  width: 375.w,
-                                  //color: Colors.amber,
-                                  child: Column(
-                                    children: [
-                                      Align(
-                                        alignment: Alignment.bottomLeft,
-                                        child: ListView.builder(
-                                          controller: _scrollController,
-                                          itemCount: _chatList.length,
-                                          shrinkWrap: true,
-                                          itemBuilder: (BuildContext context,
-                                              int index) {
-                                            LiveChat message = _chatList[index];
-                                            return Padding(
-                                              padding: EdgeInsets.all(5.h),
-                                              child: Container(
-                                                child: Row(
-                                                  mainAxisSize:
-                                                      MainAxisSize.min,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(
-                                                      height: 40.h,
-                                                      child: CircleAvatar(
-                                                        radius: 20.r,
-                                                        backgroundImage:
-                                                            AssetImage(
-                                                          message.imageUrl,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(
-                                                      width: 10.w,
-                                                    ),
-                                                    Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          "@${message.userName}",
-                                                          style: GoogleFonts
-                                                              .roboto(
-                                                                  fontSize:
-                                                                      15.sp,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold,
-                                                                  color: Colors
-                                                                      .white),
-                                                        ),
-                                                        Text(
-                                                          "${message.chat}",
-                                                          style: GoogleFonts
-                                                              .roboto(
-                                                                  fontSize:
-                                                                      12.sp,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .normal,
-                                                                  color: Colors
-                                                                      .white),
-                                                        )
-                                                      ],
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      Container(
-                                        height: 50.h,
-                                        width: 350.w,
-                                        padding: EdgeInsets.symmetric(
-                                            horizontal: 10.w),
-                                        decoration: BoxDecoration(
-                                            borderRadius:
-                                                BorderRadius.circular(25.r),
-                                            border: Border.all(
-                                                color: Colors.white)),
-                                        child: SingleChildScrollView(
-                                          scrollDirection: Axis.vertical,
-                                          child: Column(
-                                            children: [
-                                              Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                children: [
-                                                  Expanded(
-                                                    child: TextField(
-                                                      maxLengthEnforcement:
-                                                          MaxLengthEnforcement
-                                                              .none,
-                                                      controller:
-                                                          _textEditingController,
-                                                      onSubmitted: (val) {
-                                                        addText();
-                                                      },
-                                                      decoration:
-                                                          InputDecoration(
-                                                              hintText:
-                                                                  'Type a Message',
-                                                              hintStyle: GoogleFonts.roboto(
-                                                                  fontSize:
-                                                                      15.sp,
-                                                                  color: const Color(
-                                                                      0xFFB6B7B8),
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .bold),
-                                                              border:
-                                                                  const OutlineInputBorder(
-                                                                borderSide: BorderSide(
-                                                                    color: Color
-                                                                        .fromRGBO(
-                                                                            0,
-                                                                            0,
-                                                                            0,
-                                                                            0)),
-                                                              ),
-                                                              enabledBorder:
-                                                                  const OutlineInputBorder(
-                                                                      borderSide: BorderSide(
-                                                                          color: Colors
-                                                                              .transparent)),
-                                                              focusedBorder:
-                                                                  const OutlineInputBorder(
-                                                                      borderSide:
-                                                                          BorderSide(
-                                                                              color: Colors.transparent))),
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    width: 5.w,
-                                                  ),
-                                                  VerticalDivider(
-                                                    color:
-                                                        const Color(0xFFB6B7B8),
-                                                    width: 1.h,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 5.w,
-                                                  ),
-                                                  IconButton(
-                                                      onPressed: () {
-                                                        addText();
-                                                      },
-                                                      icon: Icon(
-                                                        Icons.send_outlined,
-                                                        size: 20.h,
-                                                        color: const Color(
-                                                            0xFF491BBA),
-                                                      ))
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ))
-                              : Padding(
-                                  padding: EdgeInsets.only(bottom: 60.h),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(30.r),
-                                    child: SizedBox(
-                                      height: 50.h,
-                                      width: 200.h,
-                                      child: ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            isLive = !isLive;
-                                          });
-                                        },
-                                        style: ButtonStyle(
-                                            backgroundColor:
-                                                MaterialStateProperty.all(
-                                                    const Color(0xFF00E9F7))),
-                                        child: Text(
-                                          "Go Live",
-                                          style: GoogleFonts.roboto(
-                                              fontSize: 20.sp,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black),
-                                        ),
-                                      ),
-                                    ),
                                   ),
-                                )
+                                );
+                              },
+                            ),
+                          ),
+                          Container(
+                            height: 50.h,
+                            width: 350.w,
+                            padding: EdgeInsets.symmetric(horizontal: 10.w),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(25.r),
+                                border: Border.all(color: Colors.white)),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.vertical,
+                              child: Column(
+                                children: [
+                                  Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Expanded(
+                                        child: TextField(
+                                          maxLengthEnforcement:
+                                              MaxLengthEnforcement.none,
+                                          controller: _textEditingController,
+                                          onSubmitted: (val) {
+                                            addText();
+                                          },
+                                          decoration: InputDecoration(
+                                              hintText: 'Type a Message',
+                                              hintStyle: GoogleFonts.roboto(
+                                                  fontSize: 15.sp,
+                                                  color:
+                                                      const Color(0xFFB6B7B8),
+                                                  fontWeight: FontWeight.bold),
+                                              border: const OutlineInputBorder(
+                                                borderSide: BorderSide(
+                                                    color: Color.fromRGBO(
+                                                        0, 0, 0, 0)),
+                                              ),
+                                              enabledBorder:
+                                                  const OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Colors
+                                                              .transparent)),
+                                              focusedBorder:
+                                                  const OutlineInputBorder(
+                                                      borderSide: BorderSide(
+                                                          color: Colors
+                                                              .transparent))),
+                                        ),
+                                      ),
+                                      SizedBox(
+                                        width: 5.w,
+                                      ),
+                                      VerticalDivider(
+                                        color: const Color(0xFFB6B7B8),
+                                        width: 1.h,
+                                      ),
+                                      SizedBox(
+                                        width: 5.w,
+                                      ),
+                                      IconButton(
+                                          onPressed: () {
+                                            addText();
+                                          },
+                                          icon: Icon(
+                                            Icons.send_outlined,
+                                            size: 20.h,
+                                            color: const Color(0xFF491BBA),
+                                          ))
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
                         ],
-                      ),
-                    ),
-                  );
-                }),
-          )
-        ],
-      )),
-      bottomNavigationBar: isLive
-          ? null
-          : BottomAppBar(
-              elevation: 0.0,
-              color: Colors.black,
-              child: Container(
-                height: 50.h,
-                padding: EdgeInsets.all(5.h),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    GestureDetector(
-                        onTap: () {
-                          //Argument should be true if its 15s else false
-                          Navigator.pushNamed(context, "/video15",
-                              arguments: true);
-                        },
-                        child: Text(
-                          "15s",
-                          style: GoogleFonts.roboto(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey),
-                        )),
-                    SizedBox(width: 30.w),
-                    GestureDetector(
-                        onTap: () {
-                          //Argument should be true if its 15s else false
-                          Navigator.pushNamed(
-                            context,
-                            "/video60",
-                          );
-                        },
-                        child: Text(
-                          "60s",
-                          style: GoogleFonts.roboto(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey),
-                        )),
-                        SizedBox(width: 30.w),
-                    GestureDetector(
-                        onTap: () {
-                          //Argument should be true if its 15s else false
-                          Navigator.pushNamed(
-                            context,
-                            "/video3m",
-                          );
-                        },
-                        child: Text(
-                          "3m",
-                          style: GoogleFonts.roboto(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey),
-                        )),
-                    SizedBox(width: 30.w),
-                    Column(
-                      children: [
-                        Text(
-                          "Live",
-                          style: GoogleFonts.roboto(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
+                      ))
+                  : Padding(
+                      padding: EdgeInsets.only(bottom: 60.h),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(30.r),
+                        child: SizedBox(
+                          height: 50.h,
+                          width: 200.h,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                isLive = !isLive;
+                              });
+                            },
+                            style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.all(
+                                    const Color(0xFF00E9F7))),
+                            child: Text(
+                              "Go Live",
+                              style: GoogleFonts.roboto(
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
+                            ),
+                          ),
                         ),
-                        Icon(
-                          Icons.circle,
-                          size: 5.h,
-                          color: Colors.white,
-                        )
-                      ],
+                      ),
                     )
-                  ],
-                ),
-              ),
-            ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
