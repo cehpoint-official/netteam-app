@@ -1,10 +1,10 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class Video3m extends StatefulWidget {
-  const Video3m({super.key});
+  final VoidCallback flipCam;
+  Video3m({required this.flipCam});
 
   @override
   State<Video3m> createState() => _Video3mState();
@@ -90,6 +90,7 @@ class _Video3mState extends State<Video3m> {
                           IconButton(
                               onPressed: () async {
                                 //Changing the Camera
+                                widget.flipCam();
                               },
                               icon: Icon(Icons.flip_camera_android_outlined,
                                   size: 25.h, color: Colors.white)),

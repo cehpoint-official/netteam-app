@@ -1,10 +1,10 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class Video60 extends StatefulWidget {
-  const Video60({super.key});
+  final VoidCallback flipCam;
+  Video60({required this.flipCam});
 
   @override
   State<Video60> createState() => _Video60State();
@@ -19,8 +19,6 @@ class _Video60State extends State<Video60> {
     "assets/icons/timer3.png",
     "assets/icons/Timer5.png"
   ];
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +90,7 @@ class _Video60State extends State<Video60> {
                           IconButton(
                               onPressed: () async {
                                 //Changing the Camera
+                                widget.flipCam();
                               },
                               icon: Icon(Icons.flip_camera_android_outlined,
                                   size: 25.h, color: Colors.white)),

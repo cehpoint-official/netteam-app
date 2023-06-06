@@ -56,6 +56,15 @@ class _CreateState extends State<Create> {
     super.dispose();
   }
 
+  void flipCam() async {
+    print("Flipping Camera");
+    await controller.dispose();
+    setState(() {
+      cameraIndex = (cameraIndex == 0) ? 1 : 0;
+      accessCam();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -72,7 +81,12 @@ class _CreateState extends State<Create> {
                   pageIndex = i;
                 });
               },
-              children: const [Video15(), Video60(), Video3m(), Live()],
+              children: [
+                Video15(flipCam: flipCam),
+                Video60(flipCam: flipCam),
+                Video3m(flipCam: flipCam),
+                Live(flipCam: flipCam)
+              ],
             ),
           ],
         ),

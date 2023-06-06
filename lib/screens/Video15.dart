@@ -1,14 +1,13 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:netteam/screens/Chat.dart';
 
 class Video15 extends StatefulWidget {
-  const Video15({super.key});
+  final VoidCallback flipCam;
+
+  Video15({required this.flipCam});
 
   @override
   State<Video15> createState() => _Video15State();
@@ -96,6 +95,7 @@ class _Video15State extends State<Video15> {
                           IconButton(
                               onPressed: () {
                                 //Changing the Camera
+                                widget.flipCam();
                               },
                               icon: Icon(Icons.flip_camera_android_outlined,
                                   size: 25.h, color: Colors.white)),
