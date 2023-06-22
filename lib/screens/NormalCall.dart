@@ -25,7 +25,7 @@ class _NormalCallState extends State<NormalCall> {
   final _remoteRenderer = RTCVideoRenderer();
   RTCPeerConnection? _peer;
   // 'https://netteam-backend-production.up.railway.app/'
-  IO.Socket socket = IO.io('https://netteam-backend-production.up.railway.app',<String, dynamic>{
+  IO.Socket socket = IO.io('http://localhost:3000',<String, dynamic>{
     'transports': ['websocket'],
     'autoConnect': false,
   });
@@ -117,6 +117,7 @@ class _NormalCallState extends State<NormalCall> {
   late Timer _timer;
   late Timer _timer1;
   late String otherSid;
+  bool isButtonDisabled = false;
 
   @override
   void initState() {
@@ -163,6 +164,22 @@ class _NormalCallState extends State<NormalCall> {
         print(e.toString());
       }
       isConnected = true;
+    });
+    socket.on('ask-increment',(_) async {
+      bool? data = await showConfirmationDialog(context,'Connection is offering a 5 min extension. \nDo you confirm?');
+      if(data!){
+        remainingDuration = Duration(seconds: 300 + remainingDuration.inSeconds);
+      }
+      showAlertDialog(context,'Response Sent Successfully!');
+      socket.emit('reply-increment',data);
+    });
+    socket.on('reply-increment',(data) {
+      if(data){
+        remainingDuration = Duration(seconds: 300 + remainingDuration.inSeconds);
+      }
+      String message = data ? 'Offer accepted!' : 'Offer rejected!';
+      showAlertDialog(context, message);
+      isButtonDisabled = false;
     });
     socket.on("hangup",(_) {
       print('disconnected');
@@ -306,6 +323,53 @@ class _NormalCallState extends State<NormalCall> {
     } catch (e) {
       print('Send answer failed: $e');
     }
+  }
+
+  Future<bool?> showConfirmationDialog(BuildContext context, String message) async {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Confirmation'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                Navigator.of(context).pop(false); // Return "No"
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                Navigator.of(context).pop(true); // Return "Yes"
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showAlertDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('System Response'),
+          content: Text(message),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Future<RTCPeerConnection> rtcConnection() async {
@@ -461,14 +525,19 @@ class _NormalCallState extends State<NormalCall> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             GestureDetector(
-                              onTap: () {
+                              onTap: isButtonDisabled ? null : () {
                                 // Handle extend 5 mins
-                                remainingDuration = Duration(seconds: 300 + remainingDuration.inSeconds);
+                                socket.emit('ask-increment');
+                                isButtonDisabled = true;
+                                showAlertDialog(context, 'Offer Sent Successfully!');
                               },
-                              child: SvgPicture.asset(
-                                "assets/images/extends.svg",
-                                height: 55.h,
-                                width: 55.h,
+                              child: Opacity(
+                                opacity: isButtonDisabled ? 0.5 : 1.0,
+                                child: SvgPicture.asset(
+                                  "assets/images/extends.svg",
+                                  height: 55.h,
+                                  width: 55.h,
+                                ),
                               ),
                             ),
                             GestureDetector(
