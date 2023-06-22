@@ -25,7 +25,7 @@ class _NormalCallState extends State<NormalCall> {
   final _remoteRenderer = RTCVideoRenderer();
   RTCPeerConnection? _peer;
   // 'https://netteam-backend-production.up.railway.app/'
-  IO.Socket socket = IO.io('https://netteam-backend-production.up.railway.app',<String, dynamic>{
+  IO.Socket socket = IO.io('http://localhost:3000',<String, dynamic>{
     'transports': ['websocket'],
     'autoConnect': false,
   });
@@ -183,10 +183,18 @@ class _NormalCallState extends State<NormalCall> {
     });
     socket.on("hangup",(_) {
       print('disconnected');
-      Navigator.pop(context, "/videoset");
+      isConnected = false;
+      _timer1.cancel();
+      beforeConnection();
+      socket.emit("reConnect");
+      socket.emit("startChat");
+      // Navigator.pop(context, "/videoset");
     });
-
     // CameraPreview(controller);
+    beforeConnection();
+  }
+
+  void beforeConnection(){
     _timer = Timer.periodic(const Duration(milliseconds: 300), (Timer timer) {
       if (!isConnected) {
         if (!mounted) { return; }
