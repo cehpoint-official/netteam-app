@@ -348,7 +348,7 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to Add tiktok
-                    Navigator.pushNamed(context, "/video15");
+                    Navigator.pushNamed(context, "/create");
                   },
                 ),
                 GestureDetector(
