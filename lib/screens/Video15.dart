@@ -9,7 +9,7 @@ import 'package:netteam/screens/Chat.dart';
 //Argument should be true if its 15s else false
 
 class Video15 extends StatefulWidget {
-  const Video15({super.key});
+  const Video15({Key? key}) : super(key: key);
 
   @override
   State<Video15> createState() => _Video15State();

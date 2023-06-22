@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class Chat extends StatelessWidget {
   static const String name = "Aswin Raaj";
-  const Chat({super.key});
+  const Chat({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -95,7 +95,7 @@ class ChatMessage {
 }
 
 class Body extends StatefulWidget {
-  const Body({super.key});
+  const Body({Key? key}) : super(key: key);
 
   @override
   State<Body> createState() => _BodyState();

@@ -7,7 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:netteam/screens/Chat.dart';
 
 class Live extends StatefulWidget {
-  const Live({super.key});
+  const Live({Key? key}) : super(key: key);
 
   @override
   State<Live> createState() => _LiveState();

@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,9 +10,27 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cupertino_icons/cupertino_icons.dart';
+import 'package:http/http.dart' as http;
+import 'package:video_player/video_player.dart';
+
+class ApiService {
+  static const String baseUrl = 'https://netteam-backend-production.up.railway.app';
+
+  Future<List<dynamic>> fetchReels() async {
+    final response = await http.get(Uri.parse('$baseUrl/reels'));
+    if (response.statusCode == 200) {
+      // print(response.body);
+      final data = json.decode(response.body);
+      return data;
+    } else {
+      throw Exception('Failed to fetch reels');
+    }
+  }
+}
+
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({Key? key}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -31,6 +53,32 @@ class _HomeState extends State<Home> {
   bool isSaved = false;
   bool isShared = false;
 
+  final apiService = ApiService();
+  List<dynamic> reels = [];
+  Future<void> fetchReels() async {
+    final fetchedReels = await apiService.fetchReels();
+    setState(() {
+      reels = fetchedReels;
+    });
+  }
+
+  late VideoPlayerController _videoController;
+  late ChewieController _chewierController;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchReels();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _chewierController.dispose();
+    _videoController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,18 +94,27 @@ class _HomeState extends State<Home> {
                 child: PageView.builder(
                   scrollDirection: Axis.vertical,
                   controller: _controller,
-                  itemCount: _imagePath.length,
+                  itemCount: reels.length,
                   itemBuilder: (context, index) {
+                    final reel = reels[index];
+                    // _videoController = VideoPlayerController.network('${ApiService.baseUrl}/${reel['videoUrl']}');
+                    // _chewierController = ChewieController(
+                    //   videoPlayerController: _videoController,
+                    //   autoPlay: true,
+                    //   looping: true,
+                    // );
+                    // print(reel['title']);
                     return Container(
                       padding: EdgeInsets.fromLTRB(24, 10, 10, 10),
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage(
-                            _imagePath[index],
-                          ),
+                          image: CachedNetworkImageProvider('${ApiService.baseUrl}/${reel['thumbnailUrl']}'),
                           fit: BoxFit.cover,
                         ),
                       ),
+                      // child: Chewie(
+                      //   controller: _chewierController,
+                      // ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.end,
@@ -94,7 +151,7 @@ class _HomeState extends State<Home> {
                                       ],
                                     ),
                                     SizedBox(
-                                      width: 290.w,
+                                      width: 280.w,
                                       child: Text(
                                         "Spinning through the city of angels: LA's iconic roundabout takes traffic for a whirl",
                                         style: GoogleFonts.roboto(
@@ -337,7 +394,7 @@ class Comment {
 }
 
 class CommentSection extends StatefulWidget {
-  const CommentSection({super.key});
+  const CommentSection({Key? key}) : super(key: key);
 
   @override
   State<CommentSection> createState() => _CommentSectionState();

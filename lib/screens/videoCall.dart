@@ -1,3 +1,4 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
@@ -6,7 +7,8 @@ import 'package:netteam/screens/Home.dart';
 import 'package:netteam/screens/NormalCall.dart';
 
 class VideoCall extends StatelessWidget {
-  const VideoCall({super.key});
+  const VideoCall({Key? key, required this.cameras}) : super(key: key);
+  final List<CameraDescription> cameras;
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +18,6 @@ class VideoCall extends StatelessWidget {
     // } else {
     //   return NormalCall();
     // }
-    return NormalCall();
+    return NormalCall(cameras: cameras);
   }
 }

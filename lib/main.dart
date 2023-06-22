@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netteam/screens/AboutYou.dart';
 import 'package:netteam/screens/Chat.dart';
@@ -20,12 +21,15 @@ import 'package:netteam/screens/signup.dart';
 import 'package:netteam/screens/splashscreen.dart';
 import 'package:netteam/screens/videoCall.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final cameras = await availableCameras();
+  runApp(MyApp(cameras: cameras));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key,required this.cameras,}) : super(key: key);
+  final List<CameraDescription> cameras;
 
   // This widget is the root of your application.
   @override
@@ -52,7 +56,7 @@ class MyApp extends StatelessWidget {
             "/verify": (context) => const Verify(),
             "/resetpassword": (context) => const ResetPassword(),
             "/interests": (context) => const Interests(),
-            "/videocall": (context) => const VideoCall(),
+            "/videocall": (context) => VideoCall(cameras: cameras,),
             "/videoset": (context) => const VideoSet(),
             "/chat": (context) => const Chat(),
             "/live": (context) => const Live(),

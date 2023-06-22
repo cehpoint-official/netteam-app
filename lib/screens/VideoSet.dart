@@ -9,7 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'Home.dart';
 
 class VideoSet extends StatefulWidget {
-  const VideoSet({super.key});
+  const VideoSet({Key? key}) : super(key: key);
 
   @override
   State<VideoSet> createState() => _VideoSetState();

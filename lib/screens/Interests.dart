@@ -13,7 +13,7 @@ class InterestData {
 }
 
 class Interests extends StatefulWidget {
-  const Interests({super.key});
+  const Interests({Key? key}) : super(key: key);
 
   @override
   State<Interests> createState() => _InterestsState();

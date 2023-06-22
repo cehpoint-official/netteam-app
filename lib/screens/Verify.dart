@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_pin_code_fields/flutter_pin_code_fields.dart';
 
 class Verify extends StatefulWidget {
-  const Verify({super.key});
+  const Verify({Key? key}) : super(key: key);
 
   @override
   State<Verify> createState() => _VerifyState();

@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class Video3m extends StatefulWidget {
-  const Video3m({super.key});
+  const Video3m({Key? key}) : super(key: key);
 
   @override
   State<Video3m> createState() => _Video3mState();
