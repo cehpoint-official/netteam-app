@@ -14,7 +14,7 @@ import 'package:http/http.dart' as http;
 import 'package:video_player/video_player.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000';
+  static const String baseUrl = 'https://netteam-backend-production.up.railway.app';
 
   Future<List<dynamic>> fetchReels() async {
     final response = await http.get(Uri.parse('$baseUrl/reels'));

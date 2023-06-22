@@ -25,7 +25,7 @@ class _NormalCallState extends State<NormalCall> {
   final _remoteRenderer = RTCVideoRenderer();
   RTCPeerConnection? _peer;
   // 'https://netteam-backend-production.up.railway.app/'
-  IO.Socket socket = IO.io('http://localhost:3000',<String, dynamic>{
+  IO.Socket socket = IO.io('https://netteam-backend-production.up.railway.app',<String, dynamic>{
     'transports': ['websocket'],
     'autoConnect': false,
   });
@@ -331,17 +331,23 @@ class _NormalCallState extends State<NormalCall> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirmation'),
-          content: Text(message),
+          title: const Text(
+            'Confirmation',
+            style: TextStyle(color: Colors.black),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.black),
+          ),
           actions: <Widget>[
             TextButton(
-              child: Text('No'),
+              child: const Text('No'),
               onPressed: () {
                 Navigator.of(context).pop(false); // Return "No"
               },
             ),
             TextButton(
-              child: Text('Yes'),
+              child: const Text('Yes'),
               onPressed: () {
                 Navigator.of(context).pop(true); // Return "Yes"
               },
@@ -357,11 +363,17 @@ class _NormalCallState extends State<NormalCall> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text('System Response'),
-          content: Text(message),
+          title: const Text(
+            'System Response',
+            style: TextStyle(color: Colors.black),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.black),
+          ),
           actions: <Widget>[
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
@@ -527,9 +539,11 @@ class _NormalCallState extends State<NormalCall> {
                             GestureDetector(
                               onTap: isButtonDisabled ? null : () {
                                 // Handle extend 5 mins
-                                socket.emit('ask-increment');
-                                isButtonDisabled = true;
-                                showAlertDialog(context, 'Offer Sent Successfully!');
+                                if(isConnected) {
+                                  socket.emit('ask-increment');
+                                  isButtonDisabled = true;
+                                  showAlertDialog(context, 'Offer Sent Successfully!');
+                                }
                               },
                               child: Opacity(
                                 opacity: isButtonDisabled ? 0.5 : 1.0,
