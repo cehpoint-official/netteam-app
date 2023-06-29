@@ -7,8 +7,9 @@ import 'package:netteam/screens/Home.dart';
 import 'package:netteam/screens/NormalCall.dart';
 
 class VideoCall extends StatelessWidget {
-  const VideoCall({Key? key, required this.cameras}) : super(key: key);
+  const VideoCall({Key? key, required this.cameras,required this.interests}) : super(key: key);
   final List<CameraDescription> cameras;
+  final List<String> interests;
 
   @override
   Widget build(BuildContext context) {
@@ -18,6 +19,6 @@ class VideoCall extends StatelessWidget {
     // } else {
     //   return NormalCall();
     // }
-    return NormalCall(cameras: cameras);
+    return NormalCall(cameras: cameras,interests: interests);
   }
 }

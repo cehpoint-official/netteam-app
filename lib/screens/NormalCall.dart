@@ -7,13 +7,19 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:google_fonts/google_fonts.dart';
 import 'package:socket_io_common/src/util/event_emitter.dart';
+import 'package:netteam/screens/Chat.dart';
+import 'package:http/http.dart' as http;
+
+import '../main.dart';
 
 class NormalCall extends StatefulWidget {
-  const NormalCall({Key? key, required this.cameras}) : super(key: key);
+  const NormalCall({Key? key, required this.cameras,required this.interests}) : super(key: key);
   final List<CameraDescription> cameras;
+  final List<String> interests;
 
   @override
   State<NormalCall> createState() => _NormalCallState();
@@ -24,12 +30,11 @@ class _NormalCallState extends State<NormalCall> {
   final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
   final _remoteRenderer = RTCVideoRenderer();
   RTCPeerConnection? _peer;
-  // 'https://netteam-backend-production.up.railway.app/'
-  IO.Socket socket = IO.io('http://localhost:3000',<String, dynamic>{
+  // 'https://netteam-backend-production.up.railway.app'
+  IO.Socket socket = IO.io('https://netteam-backend-production.up.railway.app',<String, dynamic>{
     'transports': ['websocket'],
     'autoConnect': false,
   });
-  // final Completer<void> completer = Completer<void>();
   final configuration = <String, dynamic>{
     'iceServers': [
       {'url': 'stun:stun3.l.google.com:19302'},
@@ -57,13 +62,15 @@ class _NormalCallState extends State<NormalCall> {
   //   });
   // }
 
-  Future<void> initRenderers() async {
+  Future<void> initRenderers(List<String> interests) async {
     await _localRenderer.initialize();
     await _remoteRenderer.initialize();
     await getUserMedia();
     socket.connect();
+    socket.emit("reConnect",{'data': interests});
     rtcConnection().then((pc) {
       _peer = pc;
+      getTokens();
     });
   }
 
@@ -118,11 +125,12 @@ class _NormalCallState extends State<NormalCall> {
   late Timer _timer1;
   late String otherSid;
   bool isButtonDisabled = false;
+  bool chatOpened = false;
 
   @override
   void initState() {
     super.initState();
-    initRenderers();
+    initRenderers(widget.interests);
     socket.on('create',(userID) async {
       print('Connected as $userID');
       socket.emit('startChat');
@@ -176,22 +184,67 @@ class _NormalCallState extends State<NormalCall> {
     socket.on('reply-increment',(data) {
       if(data){
         remainingDuration = Duration(seconds: 300 + remainingDuration.inSeconds);
+        updateTokens();
       }
       String message = data ? 'Offer accepted!' : 'Offer rejected!';
       showAlertDialog(context, message);
       isButtonDisabled = false;
     });
+    // socket.on("message",(data) {
+    //   chatOpened = true;
+    //   socket.emit("new-notif",data);
+    //   Navigator.push(context,
+    //       MaterialPageRoute(builder:
+    //           (context) => Chat(socket: socket)
+    //       )
+    //   );
+    // });
     socket.on("hangup",(_) {
       print('disconnected');
       isConnected = false;
+      if(chatOpened){
+        Navigator.pop(context);
+        chatOpened = false;
+      }
       _timer1.cancel();
       beforeConnection();
-      socket.emit("reConnect");
+      socket.emit("reConnect",{'data': widget.interests});
       socket.emit("startChat");
       // Navigator.pop(context, "/videoset");
     });
     // CameraPreview(controller);
     beforeConnection();
+  }
+
+  Future<void> updateTokens() async {
+    const String apiUrl = "https://netteam-backend-production.up.railway.app/updateTokens";
+
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "_id": id,
+            "tokens": tokens-1,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        // Login successful, process the response data
+        // print(myData.id);
+        getTokens();
+        // Handle the response data according to your needs
+        // e.g., store user data in shared preferences, navigate to home screen, etc.
+      } else if (response.statusCode == 404) {
+        // User not found
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
   }
 
   void beforeConnection(){
@@ -223,6 +276,10 @@ class _NormalCallState extends State<NormalCall> {
         () {
           if (remainingDuration.inSeconds < 1) {
             _timer1.cancel();
+            if(chatOpened){
+              Navigator.pop(context);
+              chatOpened = false;
+            }
             Navigator.pop(context, "/videoset");
           } else {
             remainingDuration = remainingDuration - oneSec;
@@ -434,7 +491,6 @@ class _NormalCallState extends State<NormalCall> {
       _timer1.cancel();
     }
     isConnected = false;
-    // socket.disconnect();
     socket.dispose();
     _remoteRenderer.dispose();
     _localRenderer.dispose();
@@ -449,9 +505,49 @@ class _NormalCallState extends State<NormalCall> {
     super.dispose();
   }
 
+  late int tokens = 0;
+  late String id;
+  Future<void> getTokens() async {
+    const String apiUrl = "https://netteam-backend-production.up.railway.app/getTokens";
+
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "_id": id,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        // Login successful, process the response data
+        // print(myData.id);
+        setState(() {
+          tokens = json.decode(response.body);
+        });
+        // print(tokens);
+        // Handle the response data according to your needs
+        // e.g., store user data in shared preferences, navigate to home screen, etc.
+      } else if (response.statusCode == 404) {
+        // User not found
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    id = Provider.of<MyDataContainer>(context).id;
+    // print(id);
+
+    getTokens();
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: GestureDetector(
@@ -548,24 +644,58 @@ class _NormalCallState extends State<NormalCall> {
                               onTap: isButtonDisabled ? null : () {
                                 // Handle extend 5 mins
                                 if(isConnected) {
-                                  socket.emit('ask-increment');
-                                  isButtonDisabled = true;
-                                  showAlertDialog(context, 'Offer Sent Successfully!');
+                                  if(tokens != 0) {
+                                    socket.emit('ask-increment');
+                                    isButtonDisabled = true;
+                                    showAlertDialog(context, 'Offer Sent Successfully!');
+                                  }else{
+                                    showAlertDialog(context, 'Not enough tokens!');
+                                  }
                                 }
                               },
-                              child: Opacity(
-                                opacity: isButtonDisabled ? 0.5 : 1.0,
-                                child: SvgPicture.asset(
-                                  "assets/images/extends.svg",
-                                  height: 55.h,
-                                  width: 55.h,
-                                ),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Opacity(
+                                    opacity: isButtonDisabled ? 0.5 : 1.0,
+                                    child: SvgPicture.asset(
+                                      "assets/images/extends.svg",
+                                      height: 55.h,
+                                      width: 55.h,
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: -2,
+                                    right: 0,
+                                    child: Container(
+                                      padding: EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Text(
+                                        '$tokens',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             GestureDetector(
                               onTap: () {
                                 //Handle Chat Request
-                                Navigator.pushNamed(context, "/chat");
+                                if(isConnected){
+                                  Navigator.push(context,
+                                      MaterialPageRoute(builder:
+                                          (context) => Chat(socket: socket,chatOpened: true)
+                                      )
+                                  );
+                                  chatOpened = true;
+                                }
                               },
                               child: SvgPicture.asset(
                                 "assets/images/chatRequest.svg",
@@ -589,7 +719,8 @@ class _NormalCallState extends State<NormalCall> {
                         )
                       ],
                     ),
-                  ))
+                  )
+              )
             ],
           ),
         ),

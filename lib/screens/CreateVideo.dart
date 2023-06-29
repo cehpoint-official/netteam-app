@@ -7,14 +7,15 @@ import 'package:netteam/screens/Video15.dart';
 import 'package:netteam/screens/Video3m.dart';
 import 'package:netteam/screens/Video60.dart';
 
-class Create extends StatefulWidget {
-  const Create({super.key});
+class CreateVideo extends StatefulWidget {
+  const CreateVideo({super.key, required this.cameras});
+  final List<CameraDescription> cameras;
 
   @override
-  State<Create> createState() => _CreateState();
+  State<CreateVideo> createState() => _CreateState();
 }
 
-class _CreateState extends State<Create> {
+class _CreateState extends State<CreateVideo> {
   final PageController _controller = PageController();
   int pageIndex = 0;
 
@@ -23,8 +24,7 @@ class _CreateState extends State<Create> {
 
   //For Camera
   Future<void> accessCam() async {
-    final _cameras = await availableCameras();
-    controller = CameraController(_cameras[cameraIndex], ResolutionPreset.max);
+    controller = CameraController(widget.cameras[cameraIndex], ResolutionPreset.max);
     controller.initialize().then((_) {
       if (!mounted) {
         return;

@@ -1,9 +1,15 @@
+import 'dart:convert';
+
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+
+import '../main.dart';
 
 class SignUp extends StatefulWidget {
   const SignUp({Key? key}) : super(key: key);
@@ -24,6 +30,9 @@ class _SignUpState extends State<SignUp> {
   String password = '';
   String password1 = '';
   String email = '';
+  String name = '';
+  late MyDataContainer dataContainer;
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -36,8 +45,36 @@ class _SignUpState extends State<SignUp> {
     return EmailValidator.validate(email);
   }
 
+  Future<void> signUp(String username, String email, String password) async {
+    var url = Uri.parse('https://netteam-backend-production.up.railway.app/signup'); // Replace with your API endpoint URL
+    var requestBody = json.encode({
+      'name': username,
+      'userId': email,
+      'password': password,
+    });
+    var response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+    if (response.statusCode == 200) {
+      // Signup successful
+      print('Signup successful');
+
+      dataContainer.updateData(json.decode(response.body)["_id"]);
+      Navigator.pop(context);
+      Navigator.pushNamed(context, "/interests");
+    } else {
+      // Signup failed
+      print('Signup failed with status code: ${response.statusCode}');
+      print('Error message: ${response.body}');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    dataContainer = Provider.of<MyDataContainer>(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFF0E0B1F),
       body: SafeArea(
@@ -83,7 +120,9 @@ class _SignUpState extends State<SignUp> {
                             borderSide: BorderSide(color: Color(0xFF9F9F9F)))),
                     keyboardType: TextInputType.emailAddress,
                     onChanged: (value) {
-                      final name = _nameController.text;
+                      setState(() {
+                        name = _nameController.text;
+                      });
                     },
                   ),
                 ),
@@ -238,7 +277,7 @@ class _SignUpState extends State<SignUp> {
                         });
                       } else {
                         //Navigate to Interests Screen
-                        Navigator.pushNamed(context, "/interests");
+                        signUp(name, email, password);
                       }
                     },
                     style: ButtonStyle(

@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class Chat extends StatelessWidget {
   static const String name = "Aswin Raaj";
-  const Chat({Key? key}) : super(key: key);
+  Chat({Key? key,required this.socket,required this.chatOpened}) : super(key: key);
+  IO.Socket socket;
+  bool chatOpened;
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +17,21 @@ class Chat extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A172E),
         centerTitle: true,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // Handle back button press here
+            Navigator.pop(context);
+          },
+        ),
         title: Text(
           name,
           style: GoogleFonts.nunito(
               fontSize: 20.sp,
               fontWeight: FontWeight.w800,
-              color: Colors.white),
+              color: Colors.white
+          ),
         ),
         bottom: PreferredSize(
             preferredSize: Size(double.infinity, 50.h),
@@ -39,6 +51,7 @@ class Chat extends StatelessWidget {
                         ),
                         onPressed: () {
                           //Activate the request
+
                         },
                       ),
                       Text(
@@ -74,16 +87,18 @@ class Chat extends StatelessWidget {
               icon: Icon(
                 Icons.share_outlined,
                 size: 20.h,
-              )),
+              )
+          ),
           IconButton(
               onPressed: () {},
               icon: Icon(
                 Icons.more_vert,
                 size: 20.h,
-              )),
+              )
+          ),
         ],
       ),
-      body: Body(),
+      body: Body(socket: socket,chatOpened: chatOpened),
     );
   }
 }
@@ -95,7 +110,9 @@ class ChatMessage {
 }
 
 class Body extends StatefulWidget {
-  const Body({Key? key}) : super(key: key);
+  Body({Key? key,required this.socket,required this.chatOpened}) : super(key: key);
+  IO.Socket socket;
+  bool chatOpened;
 
   @override
   State<Body> createState() => _BodyState();
@@ -109,14 +126,6 @@ class _BodyState extends State<Body> {
   bool isRequestVisible = false;
 
   final List<ChatMessage> _chatList = <ChatMessage>[
-    ChatMessage(
-        userID: 1,
-        text:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt "),
-    ChatMessage(
-        userID: 2,
-        text:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt "),
     ChatMessage(
         userID: 1,
         text:
@@ -141,13 +150,32 @@ class _BodyState extends State<Body> {
   void addText() {
     if (_textEditingController.text != '') {
       setState(() {
-        _chatList
-            .add(ChatMessage(userID: 2, text: _textEditingController.text));
+        _chatList.add(ChatMessage(userID: 2, text: _textEditingController.text));
+        widget.socket.emit("message",_textEditingController.text);
       });
       _textEditingController.text = '';
       FocusScope.of(context).unfocus();
       _scrollToBottom();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.socket.on("message",(data) {
+      setState(() {
+        _chatList.add(ChatMessage(userID: 1, text: data));
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    setState(() {
+      widget.chatOpened = false;
+    });
+    super.dispose();
   }
 
   @override

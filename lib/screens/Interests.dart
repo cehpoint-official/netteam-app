@@ -1,8 +1,14 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+
+import '../main.dart';
 
 class InterestData {
   String name;
@@ -22,6 +28,8 @@ class Interests extends StatefulWidget {
 class _InterestsState extends State<Interests>
     with SingleTickerProviderStateMixin {
   final TextEditingController _controller = TextEditingController();
+  late MyDataContainer dataContainer;
+  late String id;
 
   final List<InterestData> _professional = <InterestData>[
     InterestData(
@@ -191,6 +199,72 @@ class _InterestsState extends State<Interests>
     );
   }
 
+  void showAlertDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text(
+            'System Response',
+            style: TextStyle(color: Colors.black),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.black),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  List<String> interests = [];
+  Future<void> storeInterests() async {
+    _professional.forEach((e) {
+      if(e.isSelected){
+        interests.add(e.name);
+      }
+    });
+    _student.forEach((e) {
+      if(e.isSelected){
+        interests.add(e.name);
+      }
+    });
+    _general.forEach((e) {
+      if(e.isSelected){
+        interests.add(e.name);
+      }
+    });
+
+
+    var url = Uri.parse('https://netteam-backend-production.up.railway.app/storeInterests'); // Replace with your API endpoint URL
+    var requestBody = json.encode({
+      '_id': id,
+      'interests': interests,
+    });
+    var response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: requestBody,
+    );
+    if (response.statusCode == 200) {
+      // Interests added successfully
+      print('Interests added successfully');
+      Navigator.pop(context);
+    } else {
+      // Interests addition failed
+      print('Interst addition failed with status code: ${response.statusCode}');
+      print('Error message: ${response.body}');
+    }
+  }
+
   int get professionalSelected {
     return _professional.where((e) => e.isSelected).length;
   }
@@ -205,6 +279,8 @@ class _InterestsState extends State<Interests>
 
   @override
   Widget build(BuildContext context) {
+    id = Provider.of<MyDataContainer>(context).id;
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -547,7 +623,13 @@ class _InterestsState extends State<Interests>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          if(professionalSelected>0 && studentSelected>0 && generalSelected>0){
+                            storeInterests();
+                          }else{
+                            showAlertDialog(context, 'Select atleast 1 interest from every field!');
+                          }
+                        },
                         style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all(Color(0xFF1EA7D7)),
                           shape: MaterialStateProperty.all(RoundedRectangleBorder(
