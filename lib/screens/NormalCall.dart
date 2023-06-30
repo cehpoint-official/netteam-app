@@ -125,7 +125,15 @@ class _NormalCallState extends State<NormalCall> {
   late Timer _timer1;
   late String otherSid;
   bool isButtonDisabled = false;
+  bool isChatButtonDisabled = false;
   bool chatOpened = false;
+
+  void handleChatClosed(bool isOpened) {
+    // Handle the chat state here
+    if (!isOpened) {
+      chatOpened = false;
+    }
+  }
 
   @override
   void initState() {
@@ -190,22 +198,37 @@ class _NormalCallState extends State<NormalCall> {
       showAlertDialog(context, message);
       isButtonDisabled = false;
     });
-    // socket.on("message",(data) {
-    //   chatOpened = true;
-    //   socket.emit("new-notif",data);
-    //   Navigator.push(context,
-    //       MaterialPageRoute(builder:
-    //           (context) => Chat(socket: socket)
-    //       )
-    //   );
-    // });
+    socket.on('ask-chat',(_) {
+      showConfirmationDialog(context,'Connection wants to chat. Confirm?').then((data) {
+        socket.emit('reply-chat',data);
+        if(data!){
+          chatOpened = true;
+          Navigator.push(context,
+              MaterialPageRoute(builder:
+                  (context) => Chat(socket: socket,handleChatClosed: handleChatClosed,)
+              )
+          );
+        }else{
+          showAlertDialog(context, "Response sent successfully!");
+        }
+      });
+    });
+    socket.on('reply-chat',(data){
+      isChatButtonDisabled = false;
+      if(data){
+        chatOpened = true;
+        Navigator.push(context,
+            MaterialPageRoute(builder:
+                (context) => Chat(socket: socket,handleChatClosed: handleChatClosed,)
+            )
+        );
+      }else{
+        showAlertDialog(context, "Offer Rejected!");
+      }
+    });
     socket.on("hangup",(_) {
       print('disconnected');
       isConnected = false;
-      if(chatOpened){
-        Navigator.pop(context);
-        chatOpened = false;
-      }
       _timer1.cancel();
       beforeConnection();
       socket.emit("reConnect",{'data': widget.interests});
@@ -278,6 +301,7 @@ class _NormalCallState extends State<NormalCall> {
             _timer1.cancel();
             if(chatOpened){
               Navigator.pop(context);
+              socket.emit("close-chat");
               chatOpened = false;
             }
             Navigator.pop(context, "/videoset");
@@ -689,12 +713,9 @@ class _NormalCallState extends State<NormalCall> {
                               onTap: () {
                                 //Handle Chat Request
                                 if(isConnected){
-                                  Navigator.push(context,
-                                      MaterialPageRoute(builder:
-                                          (context) => Chat(socket: socket,chatOpened: true)
-                                      )
-                                  );
-                                  chatOpened = true;
+                                  isChatButtonDisabled = true;
+                                  socket.emit('ask-chat');
+                                  showAlertDialog(context, "Request sent successfully!");
                                 }
                               },
                               child: SvgPicture.asset(

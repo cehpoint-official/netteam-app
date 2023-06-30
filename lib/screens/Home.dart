@@ -65,6 +65,32 @@ class _HomeState extends State<Home> {
     fetchReels();
   }
 
+  void showAlertDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text(
+            'System Response',
+            style: TextStyle(color: Colors.black),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.black),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     // TODO: implement dispose
@@ -99,9 +125,9 @@ class _HomeState extends State<Home> {
                     _chewierController = ChewieController(
                       videoPlayerController: _videoController,
                       aspectRatio: _videoController.value.aspectRatio,
-                      autoPlay: true,
+                      autoPlay: false,
                       // showControls: false,
-                      looping: true,
+                      looping: false,
                       // placeholder: isVideoLoaded ? null : const Center(
                       //     child: CircularProgressIndicator()
                       // ),
@@ -188,6 +214,7 @@ class _HomeState extends State<Home> {
                                             children: [
                                               IconButton(
                                                   onPressed: () {
+                                                    showAlertDialog(context, "This Feature is Under Development");
                                                     setState(() {
                                                       isLiked = !isLiked;
                                                     });
@@ -227,6 +254,7 @@ class _HomeState extends State<Home> {
                                                         builder: (BuildContext context) {
                                                           return CommentSection();
                                                         });
+                                                    showAlertDialog(context, "This Feature is Under Development");
                                                   },
                                                   child: Image.asset(
                                                     "assets/icons/comment.png",
@@ -251,6 +279,7 @@ class _HomeState extends State<Home> {
                                             children: [
                                               IconButton(
                                                   onPressed: () {
+                                                    showAlertDialog(context, "This Feature is Under Development");
                                                     setState(() {
                                                      isSaved = !isSaved;
                                                     });
@@ -282,7 +311,9 @@ class _HomeState extends State<Home> {
                                                 height: 5.h,
                                               ),
                                               GestureDetector(
-                                                  onTap: () {},
+                                                  onTap: () {
+                                                    showAlertDialog(context, "This Feature is Under Development");
+                                                  },
                                                   child: Image.asset(
                                                     "assets/icons/share.png",
                                                     height: 30.h,
@@ -376,6 +407,7 @@ class _HomeState extends State<Home> {
                     //Navigate to Add tiktok
                     Navigator.pop(context);
                     Navigator.pushNamed(context, "/create");
+                    showAlertDialog(context, "This Feature is Under Development");
                   },
                 ),
                 GestureDetector(
@@ -387,6 +419,7 @@ class _HomeState extends State<Home> {
                     //Navigate to chat
                     Navigator.pop(context);
                     Navigator.pushNamed(context, "/chatlist");
+                    showAlertDialog(context, "This Feature is Under Development");
                   },
                 ),
                 GestureDetector(
@@ -398,6 +431,7 @@ class _HomeState extends State<Home> {
                     //Navigate to Account section
                     Navigator.pop(context);
                     Navigator.pushNamed(context, "/aboutyou");
+                    showAlertDialog(context, "This Feature is Under Development");
                   },
                 ),
               ],
