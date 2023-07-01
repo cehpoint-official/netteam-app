@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AboutYou extends StatelessWidget {
-  const AboutYou({super.key});
+  const AboutYou({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +108,7 @@ class AboutYou extends StatelessWidget {
 }
 
 class Body extends StatefulWidget {
-  const Body({super.key});
+  const Body({Key? key}) : super(key: key);
 
   @override
   State<Body> createState() => _BodyState();

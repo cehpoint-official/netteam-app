@@ -1,11 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+
+import '../main.dart';
 
 class Login extends StatefulWidget {
-  const Login({super.key});
+  Login({Key? key}) : super(key: key);
 
   @override
   State<Login> createState() => _LoginState();
@@ -15,6 +21,8 @@ class _LoginState extends State<Login> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _showPassword = false;
+  late MyDataContainer dataContainer;
+
 
   @override
   void dispose() {
@@ -23,8 +31,43 @@ class _LoginState extends State<Login> {
     super.dispose();
   }
 
+  Future<void> _login() async {
+    const String apiUrl = "https://netteam-backend-production.up.railway.app/login";
+
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "userId": _emailController.text,
+            "password": _passwordController.text,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        // Login successful, process the response data
+        // print(myData.id);
+        dataContainer.updateData(json.decode(response.body)["_id"]);
+        Navigator.pop(context);
+        Navigator.pushNamed(context, "/");
+        // Handle the response data according to your needs
+        // e.g., store user data in shared preferences, navigate to home screen, etc.
+      } else if (response.statusCode == 404) {
+        // User not found
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    dataContainer = Provider.of<MyDataContainer>(context);
+
     return Scaffold(
       body: Container(
         height: double.infinity,
@@ -68,9 +111,6 @@ class _LoginState extends State<Login> {
                       enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Color(0xFF9F9F9F)))),
                   keyboardType: TextInputType.emailAddress,
-                  onChanged: (value) {
-                    final email = _emailController.text;
-                  },
                 ),
               ),
               SizedBox(
@@ -109,9 +149,6 @@ class _LoginState extends State<Login> {
                       enabledBorder: const UnderlineInputBorder(
                           borderSide: BorderSide(color: Color(0xFF9F9F9F)))),
                   keyboardType: TextInputType.emailAddress,
-                  onChanged: (value) {
-                    final password = _passwordController.text;
-                  },
                 ),
               ),
               SizedBox(
@@ -141,9 +178,9 @@ class _LoginState extends State<Login> {
                 height: 46.h,
                 width: 295.w,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/");
+                  onPressed: () async {
                     //Backend Work
+                    await _login();
                   },
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(

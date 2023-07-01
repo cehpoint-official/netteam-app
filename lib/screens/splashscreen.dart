@@ -7,7 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netteam/screens/login.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+  const SplashScreen({Key? key}) : super(key: key);
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -18,14 +18,14 @@ class _SplashScreenState extends State<SplashScreen> {
   @override  
   void initState() {  
     super.initState();  
-    Timer(Duration(seconds: 5),  
-            ()=>Navigator.pushReplacement(context,  
-            MaterialPageRoute(builder:  
-                (context) => Login()  
-            )  
-         )  
+    Timer(Duration(seconds: 2),
+            ()=>Navigator.pushReplacement(context,
+            MaterialPageRoute(builder:
+                (context) => Login()
+            )
+         )
     ); 
-    } 
+    }
   
   @override
   Widget build(BuildContext context) {

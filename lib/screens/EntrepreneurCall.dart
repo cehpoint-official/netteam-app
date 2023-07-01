@@ -7,7 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class EntrepreneurCall extends StatefulWidget {
-  const EntrepreneurCall({super.key});
+  const EntrepreneurCall({Key? key}) : super(key: key);
 
   @override
   State<EntrepreneurCall> createState() => _EntrepreneurCallState();

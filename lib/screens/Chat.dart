@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class Chat extends StatelessWidget {
   static const String name = "Aswin Raaj";
-  const Chat({super.key});
+  Chat({Key? key,required this.socket,required this.handleChatClosed}) : super(key: key);
+  IO.Socket socket;
+  final Function(bool isOpened) handleChatClosed;
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +17,23 @@ class Chat extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF1A172E),
         centerTitle: true,
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            // Handle back button press here
+            socket.emit('close-chat');
+            handleChatClosed(false);
+            Navigator.pop(context);
+          },
+        ),
         title: Text(
           name,
           style: GoogleFonts.nunito(
               fontSize: 20.sp,
               fontWeight: FontWeight.w800,
-              color: Colors.white),
+              color: Colors.white
+          ),
         ),
         bottom: PreferredSize(
             preferredSize: Size(double.infinity, 50.h),
@@ -39,6 +53,7 @@ class Chat extends StatelessWidget {
                         ),
                         onPressed: () {
                           //Activate the request
+                          socket.emit('ask-exchange-numbers');
                         },
                       ),
                       Text(
@@ -74,16 +89,18 @@ class Chat extends StatelessWidget {
               icon: Icon(
                 Icons.share_outlined,
                 size: 20.h,
-              )),
+              )
+          ),
           IconButton(
               onPressed: () {},
               icon: Icon(
                 Icons.more_vert,
                 size: 20.h,
-              )),
+              )
+          ),
         ],
       ),
-      body: Body(),
+      body: Body(socket: socket,handleChatClosed: handleChatClosed,),
     );
   }
 }
@@ -95,7 +112,9 @@ class ChatMessage {
 }
 
 class Body extends StatefulWidget {
-  const Body({super.key});
+  Body({Key? key,required this.socket,required this.handleChatClosed}) : super(key: key);
+  IO.Socket socket;
+  final Function(bool isOpened) handleChatClosed;
 
   @override
   State<Body> createState() => _BodyState();
@@ -109,14 +128,6 @@ class _BodyState extends State<Body> {
   bool isRequestVisible = false;
 
   final List<ChatMessage> _chatList = <ChatMessage>[
-    ChatMessage(
-        userID: 1,
-        text:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt "),
-    ChatMessage(
-        userID: 2,
-        text:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt "),
     ChatMessage(
         userID: 1,
         text:
@@ -141,13 +152,57 @@ class _BodyState extends State<Body> {
   void addText() {
     if (_textEditingController.text != '') {
       setState(() {
-        _chatList
-            .add(ChatMessage(userID: 2, text: _textEditingController.text));
+        _chatList.add(ChatMessage(userID: 2, text: _textEditingController.text));
+        widget.socket.emit("message",_textEditingController.text);
       });
       _textEditingController.text = '';
       FocusScope.of(context).unfocus();
       _scrollToBottom();
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    widget.socket.on("message",(data) {
+      setState(() {
+        _chatList.add(ChatMessage(userID: 1, text: data));
+      });
+    });
+    widget.socket.on("ask-exchange-numbers",(_) {
+      setState(() {
+        isRequestVisible = true;
+      });
+    });
+    widget.socket.on("reply-exchange-numbers",(_) {
+      setState(() {
+        List<ChatMessage> _contactAdd =
+        <ChatMessage>[
+          ChatMessage(
+              userID: 2,
+              text:
+                  "Aswin Raaj number : ${user1Number}")
+        ];
+        _chatList.addAll(_contactAdd);
+      });
+      widget.socket.emit("message","Aswin Raaj number : ${user1Number}");
+    });
+    widget.socket.on("close-chat",(_) {
+      widget.handleChatClosed(false);
+      Navigator.pop(context);
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    if(mounted){
+      widget.socket.off("message");
+      widget.socket.off("ask-exchange-numbers");
+      widget.socket.off("reply-exchange-numbers");
+      widget.socket.off("close-chat");
+    }
+    super.dispose();
   }
 
   @override
@@ -193,6 +248,7 @@ class _BodyState extends State<Body> {
                                         text:
                                             "Sorry, I can't share my number"));
                                   });
+                                  widget.socket.emit("message","Sorry, I can't share my number");
                                   isRequestVisible = !isRequestVisible;
                                 },
                                 child: Container(
@@ -218,16 +274,14 @@ class _BodyState extends State<Body> {
                                     List<ChatMessage> _contactAdd =
                                         <ChatMessage>[
                                       ChatMessage(
-                                          userID: 1,
-                                          text:
-                                              "Person X number : ${user2Number}"),
-                                      ChatMessage(
                                           userID: 2,
                                           text:
-                                              "Aswin Raaj number : ${user1Number}")
+                                              "Person X number : ${user2Number}"),
                                     ];
                                     _chatList.addAll(_contactAdd);
                                   });
+                                  widget.socket.emit("message","Person X number : ${user2Number}");
+                                  widget.socket.emit("reply-exchange-numbers");
                                   isRequestVisible = !isRequestVisible;
                                 },
                                 child: Container(

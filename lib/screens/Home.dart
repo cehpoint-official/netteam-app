@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chewie/chewie.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,9 +10,27 @@ import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cupertino_icons/cupertino_icons.dart';
+import 'package:http/http.dart' as http;
+import 'package:video_player/video_player.dart';
+
+class ApiService {
+  static const String baseUrl = 'https://netteam-backend-production.up.railway.app';
+
+  Future<List<dynamic>> fetchReels() async {
+    final response = await http.get(Uri.parse('$baseUrl/reels'));
+    if (response.statusCode == 200) {
+      // print(response.body);
+      final data = json.decode(response.body);
+      return data;
+    } else {
+      throw Exception('Failed to fetch reels');
+    }
+  }
+}
+
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  const Home({Key? key}) : super(key: key);
 
   @override
   State<Home> createState() => _HomeState();
@@ -20,16 +42,63 @@ class ScreenArguments {
 }
 
 class _HomeState extends State<Home> {
-  final List<String> _imagePath = [
-    "assets/images/tiktok_image.png",
-    "assets/images/tiktok_image.png",
-    "assets/images/tiktok_image.png",
-  ];
-
   final PageController _controller = PageController(viewportFraction: 1);
   bool isLiked = false;
   bool isSaved = false;
   bool isShared = false;
+
+  final apiService = ApiService();
+  List<dynamic> reels = [];
+  Future<void> fetchReels() async {
+    final fetchedReels = await apiService.fetchReels();
+    setState(() {
+      reels = fetchedReels;
+    });
+  }
+
+  late ChewieController _chewierController;
+  int _currentPlayingIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchReels();
+  }
+
+  void showAlertDialog(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text(
+            'System Response',
+            style: TextStyle(color: Colors.black),
+          ),
+          content: Text(
+            message,
+            style: const TextStyle(color: Colors.black),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _controller.dispose();
+    _chewierController.dispose();
+    // _videoController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,191 +115,233 @@ class _HomeState extends State<Home> {
                 child: PageView.builder(
                   scrollDirection: Axis.vertical,
                   controller: _controller,
-                  itemCount: _imagePath.length,
+                  itemCount: reels.length,
                   itemBuilder: (context, index) {
-                    return Container(
-                      padding: EdgeInsets.fromLTRB(24, 10, 10, 10),
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: AssetImage(
-                            _imagePath[index],
+                    final reel = reels[index];
+                    final videoUrl = '${ApiService.baseUrl}/${reel['videoUrl']}';
+                    final thumbnailUrl = '${ApiService.baseUrl}/${reel['thumbnailUrl']}';
+
+                    VideoPlayerController _videoController = VideoPlayerController.network(videoUrl);
+                    _chewierController = ChewieController(
+                      videoPlayerController: _videoController,
+                      aspectRatio: _videoController.value.aspectRatio,
+                      autoPlay: false,
+                      // showControls: false,
+                      looping: false,
+                      // placeholder: isVideoLoaded ? null : const Center(
+                      //     child: CircularProgressIndicator()
+                      // ),
+                    );
+
+                    return FutureBuilder<void>(
+                      future: VideoPlayerController.network(videoUrl).initialize(),
+                      builder: (context, snapshot) {
+                        final isVideoLoaded = snapshot.connectionState == ConnectionState.done;
+
+                        if (index != _currentPlayingIndex) {
+                          _videoController.pause();
+                          _chewierController.pause();
+                          _currentPlayingIndex = index;
+                        }
+
+                        return Container(
+                          // padding: EdgeInsets.fromLTRB(24, 10, 10, 10),
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: CachedNetworkImageProvider(isVideoLoaded ? videoUrl : thumbnailUrl),
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              SizedBox(
-                                height: 230.h,
-                                child: Column(
+                          child: Stack(
+                          children: [
+                            Chewie(
+                              controller: _chewierController,
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Row(
                                   mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
+                                    SizedBox(
+                                      height: 230.h,
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                            children: [
+                                              Container(
+                                                child: Image.asset(
+                                                  "assets/images/profile_pic.png",
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: 10.w,
+                                              ),
+                                              Text(
+                                              "@iamaswin",
+                                                style: GoogleFonts.roboto(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 15.sp,
+                                                    color: Colors.white),
+                                              )
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            width: 280.w,
+                                            child: Text(
+                                              "Spinning through the city of angels: LA's iconic roundabout takes traffic for a whirl",
+                                              style: GoogleFonts.roboto(
+                                                  fontSize: 12.sp,
+                                                  fontWeight: FontWeight.normal,
+                                                  color: Colors.white),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    Column(
                                       children: [
-                                        Container(
-                                          child: Image.asset(
-                                            "assets/images/profile_pic.png",
-                                            fit: BoxFit.cover,
+                                        SizedBox(
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                            children: [
+                                              IconButton(
+                                                  onPressed: () {
+                                                    showAlertDialog(context, "This Feature is Under Development");
+                                                    setState(() {
+                                                      isLiked = !isLiked;
+                                                    });
+                                                  },
+                                                  icon: Icon(
+                                                    isLiked
+                                                        ? CupertinoIcons.heart_fill
+                                                        : CupertinoIcons.heart,
+                                                    size: 30.h,
+                                                    color: Colors.white,
+                                                  )
+                                              ),
+                                              Text(
+                                                "31K",
+                                                style: GoogleFonts.roboto(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold),
+                                              )
+                                            ],
                                           ),
                                         ),
                                         SizedBox(
-                                          width: 10.w,
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                height: 10.h,
+                                              ),
+                                              GestureDetector(
+                                                  onTap: () {
+                                                    showModalBottomSheet(
+                                                        context: context,
+                                                        backgroundColor:
+                                                        Colors.transparent,
+                                                        builder: (BuildContext context) {
+                                                          return CommentSection();
+                                                        });
+                                                    showAlertDialog(context, "This Feature is Under Development");
+                                                  },
+                                                  child: Image.asset(
+                                                    "assets/icons/comment.png",
+                                                    height: 30.h,
+                                                    width: 30.h,
+                                                  )
+                                              ),
+                                              Text(
+                                                "2K",
+                                                style: GoogleFonts.roboto(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold),
+                                              )
+                                            ],
+                                          ),
                                         ),
-                                        Text(
-                                          "@iamaswin",
-                                          style: GoogleFonts.roboto(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 15.sp,
-                                              color: Colors.white),
+                                        SizedBox(
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                            children: [
+                                              IconButton(
+                                                  onPressed: () {
+                                                    showAlertDialog(context, "This Feature is Under Development");
+                                                    setState(() {
+                                                     isSaved = !isSaved;
+                                                    });
+                                                  },
+                                                  icon: Icon(
+                                                    isSaved
+                                                        ? Icons.bookmark
+                                                        : Icons.bookmark_outline,
+                                                    size: 30.h,
+                                                    color: Colors.white,
+                                                  )
+                                              ),
+                                              Text(
+                                                "4K",
+                                                style: GoogleFonts.roboto(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          child: Column(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                            children: [
+                                              SizedBox(
+                                                height: 5.h,
+                                              ),
+                                              GestureDetector(
+                                                  onTap: () {
+                                                    showAlertDialog(context, "This Feature is Under Development");
+                                                  },
+                                                  child: Image.asset(
+                                                    "assets/icons/share.png",
+                                                    height: 30.h,
+                                                    width: 30.h,
+                                                  )
+                                              ),
+                                              Text(
+                                                "5K",
+                                                style: GoogleFonts.roboto(
+                                                    fontSize: 12.sp,
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold
+                                                ),
+                                              )
+                                            ],
+                                          ),
                                         )
                                       ],
-                                    ),
-                                    SizedBox(
-                                      width: 290.w,
-                                      child: Text(
-                                        "Spinning through the city of angels: LA's iconic roundabout takes traffic for a whirl",
-                                        style: GoogleFonts.roboto(
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.normal,
-                                            color: Colors.white),
-                                      ),
                                     )
                                   ],
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  SizedBox(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                isLiked = !isLiked;
-                                              });
-                                            },
-                                            icon: Icon(
-                                              isLiked
-                                                  ? CupertinoIcons.heart_fill
-                                                  : CupertinoIcons.heart,
-                                              size: 30.h,
-                                              color: Colors.white,
-                                            )),
-                                        Text(
-                                          "31K",
-                                          style: GoogleFonts.roboto(
-                                              fontSize: 12.sp,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 10.h,
-                                        ),
-                                        GestureDetector(
-                                            onTap: () {
-                                              showModalBottomSheet(
-                                                  context: context,
-                                                  backgroundColor:
-                                                      Colors.transparent,
-                                                  builder:
-                                                      (BuildContext context) {
-                                                    return CommentSection();
-                                                  });
-                                            },
-                                            child: Image.asset(
-                                              "assets/icons/comment.png",
-                                              height: 30.h,
-                                              width: 30.h,
-                                            )),
-                                        Text(
-                                          "2K",
-                                          style: GoogleFonts.roboto(
-                                              fontSize: 12.sp,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                isSaved = !isSaved;
-                                              });
-                                            },
-                                            icon: Icon(
-                                              isSaved
-                                                  ? Icons.bookmark
-                                                  : Icons.bookmark_outline,
-                                              size: 30.h,
-                                              color: Colors.white,
-                                            )),
-                                        Text(
-                                          "4K",
-                                          style: GoogleFonts.roboto(
-                                              fontSize: 12.sp,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: 5.h,
-                                        ),
-                                        GestureDetector(
-                                            onTap: () {},
-                                            child: Image.asset(
-                                              "assets/icons/share.png",
-                                              height: 30.h,
-                                              width: 30.h,
-                                            )),
-                                        Text(
-                                          "5K",
-                                          style: GoogleFonts.roboto(
-                                              fontSize: 12.sp,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold),
-                                        )
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              )
-                            ],
-                          )
-                        ],
-                      ),
+                                )
+                              ],
+                            ),
+                          ])
+                        );
+                      },
                     );
-                  },
+                  }
                 ),
               ),
               Container(
@@ -272,6 +383,8 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFF1EA7D7))),
                   onTap: () {
                     //Navigate to Home
+                    Navigator.pop(context);
+                    Navigator.pushNamed(context, "/");
                   },
                 ),
                 GestureDetector(
@@ -281,6 +394,7 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to Video Call
+                    Navigator.pop(context);
                     Navigator.pushNamed(context, "/videoset");
                   },
                 ),
@@ -291,7 +405,9 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to Add tiktok
+                    Navigator.pop(context);
                     Navigator.pushNamed(context, "/create");
+                    showAlertDialog(context, "This Feature is Under Development");
                   },
                 ),
                 GestureDetector(
@@ -301,7 +417,9 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to chat
+                    Navigator.pop(context);
                     Navigator.pushNamed(context, "/chatlist");
+                    showAlertDialog(context, "This Feature is Under Development");
                   },
                 ),
                 GestureDetector(
@@ -311,15 +429,20 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to Account section
+                    Navigator.pop(context);
                     Navigator.pushNamed(context, "/aboutyou");
+                    showAlertDialog(context, "This Feature is Under Development");
                   },
                 ),
               ],
             ),
           ),
-        ));
+        )
+    );
   }
 }
+
+
 
 //Class for Comment
 class Comment {
@@ -337,7 +460,7 @@ class Comment {
 }
 
 class CommentSection extends StatefulWidget {
-  const CommentSection({super.key});
+  const CommentSection({Key? key}) : super(key: key);
 
   @override
   State<CommentSection> createState() => _CommentSectionState();

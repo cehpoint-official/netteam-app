@@ -6,7 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class Live extends StatefulWidget {
   final VoidCallback flipCam;
-  Live({required this.flipCam});
+  const Live({Key? key, required this.flipCam}) : super(key: key);
 
   @override
   State<Live> createState() => _LiveState();

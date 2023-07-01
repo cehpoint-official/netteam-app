@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class Video60 extends StatefulWidget {
   final VoidCallback flipCam;
-  Video60({required this.flipCam});
+  const Video60({Key? key,required this.flipCam}) : super(key: key);
 
   @override
   State<Video60> createState() => _Video60State();

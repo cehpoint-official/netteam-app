@@ -1,15 +1,20 @@
 import 'dart:async';
-
+import 'dart:convert';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:netteam/screens/videoCall.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
-import 'Home.dart';
+import '../main.dart';
 
 class VideoSet extends StatefulWidget {
-  const VideoSet({super.key});
+  const VideoSet({Key? key,required this.cameras}) : super(key: key);
+  final List<CameraDescription> cameras;
 
   @override
   State<VideoSet> createState() => _VideoSetState();
@@ -20,6 +25,7 @@ class _VideoSetState extends State<VideoSet> {
   bool isError = false;
   late String errMsg;
   late Timer timer;
+  late String id;
 
   TextEditingController _interestController = TextEditingController();
 
@@ -48,8 +54,40 @@ class _VideoSetState extends State<VideoSet> {
     });
   }
 
+  List<String> autoInterests = [];
+  Future<List<String>> getInterests() async {
+    const String apiUrl = "https://netteam-backend-production.up.railway.app/getInterests";
+
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "_id": id,
+          })
+      );
+
+      if (response.statusCode == 200) {
+
+        final List<dynamic> data = jsonDecode(response.body);
+        return List<String>.from(data);
+
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+    return [];
+  }
+
   @override
   Widget build(BuildContext context) {
+    id = Provider.of<MyDataContainer>(context).id;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -100,8 +138,13 @@ class _VideoSetState extends State<VideoSet> {
                 spacing: 8.0,
                 runSpacing: 4.0,
                 children: interests.map((String interest) {
-                  return Chip(
-                    label: Text(interest),
+                  return GestureDetector(
+                      onDoubleTap: (){
+                        _removeInterest(interest);
+                      },
+                      child: Chip(
+                        label: Text(interest),
+                      ),
                   );
                 }).toList(),
               ),
@@ -173,7 +216,11 @@ class _VideoSetState extends State<VideoSet> {
                         ),
                         onPressed: () {
                           if (interests.length > 0) {
-                            Navigator.pushNamed(context, "/videocall");
+                            Navigator.push(context,
+                                MaterialPageRoute(builder:
+                                    (context) => VideoCall(cameras: widget.cameras,interests: interests)
+                                )
+                            );
                           } else {
                             setState(() {
                               errMsg =
@@ -218,7 +265,16 @@ class _VideoSetState extends State<VideoSet> {
                             fontSize: 15.sp),
                       ),
                       onPressed: () {
-                        Navigator.pushNamed(context, "/videocall");
+                        getInterests().then((array) {
+                          setState(() {
+                            autoInterests = array;
+                          });
+                          Navigator.push(context,
+                              MaterialPageRoute(builder:
+                                  (context) => VideoCall(cameras: widget.cameras,interests: autoInterests)
+                              )
+                          );
+                        });
                       },
                     ),
                   ),
