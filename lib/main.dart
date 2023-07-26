@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:netteam/screens/AboutYou.dart';
 import 'package:netteam/screens/Chat.dart';
 import 'package:netteam/screens/Chatlist.dart';
+import 'package:netteam/screens/Followers-FollowinfDetails.dart';
 import 'package:netteam/screens/ForgotPassword.dart';
 import 'package:netteam/screens/Home.dart';
 import 'package:netteam/screens/Interests.dart';
@@ -11,12 +12,15 @@ import 'package:netteam/screens/Live.dart';
 import 'package:netteam/screens/PricingPlans.dart';
 import 'package:netteam/screens/Profile.dart';
 import 'package:netteam/screens/ResetPassword.dart';
+import 'package:netteam/screens/Search.dart';
+import 'package:netteam/screens/UserProfile.dart';
 import 'package:netteam/screens/Verify.dart';
 import 'package:netteam/screens/Video15.dart';
 import 'package:netteam/screens/Video3m.dart';
 import 'package:netteam/screens/Video60.dart';
 import 'package:netteam/screens/VideoSet.dart';
 import 'package:netteam/screens/CreateVideo.dart';
+import 'package:netteam/screens/ViewersLive.dart';
 import 'package:netteam/screens/login.dart';
 import 'package:netteam/screens/signup.dart';
 import 'package:netteam/screens/splashscreen.dart';
@@ -24,18 +28,32 @@ import 'package:netteam/screens/videoCall.dart';
 import 'package:netteam/screens/CreateVideo.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class MyDataContainer extends ChangeNotifier {
   String id = "";
+  String name = "";
+  String profilePic = "";
+  String userId = "";
+  String userEmail = "";
+  String socialUrl = "";
+  List<String> interests = [];
 
-  void updateData(String newValue) {
-    id = newValue;
+  void updateData(String newId,String newName,String newProfilePic,String newUserId,String newUserEmail,String newSocialUrl,List<String> newInterests) {
+    id = newId;
+    name = newName;
+    profilePic = newProfilePic;
+    userId = newUserId;
+    userEmail = newUserEmail;
+    socialUrl = newSocialUrl;
+    interests.addAll(newInterests);
     notifyListeners();
   }
 }
 
-Future<void> main() async {
+Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env");
   final cameras = await availableCameras();
   runApp(
     ChangeNotifierProvider(
@@ -71,8 +89,8 @@ class MyApp extends StatelessWidget {
             "/login": (context) => Login(),
             "/signup": (context) => const SignUp(),
             "/forgotpassword": (context) => const ForgotPassword(),
-            "/verify": (context) => const Verify(),
-            "/resetpassword": (context) => const ResetPassword(),
+            // "/verify": (context) => const Verify(),
+            // "/resetpassword": (context) => const ResetPassword(),
             "/interests": (context) => const Interests(),
             // "/videocall": (context) => const VideoCall(),
             "/videoset": (context) => VideoSet(cameras: cameras,),
@@ -85,7 +103,11 @@ class MyApp extends StatelessWidget {
             "/profile" : (context) => const Profile(),
             "/pricingplans": (context) =>  PricingPlans(),
             "/aboutyou" : (context) => const AboutYou(),
-            "/create" : (context) => CreateVideo(cameras: cameras,)
+            "/create" : (context) => CreateVideo(cameras: cameras,),
+            "/search" : (context) => const Search(),
+            "/userprofile" : (context) => const UserProfile(),
+            "/viewerslive" : (context) =>const ViewersLive(),
+            // "/followers-following" : (context) => FollowersFollowing(),
           },
         );
       },

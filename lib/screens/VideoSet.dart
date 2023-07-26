@@ -22,6 +22,7 @@ class VideoSet extends StatefulWidget {
 
 class _VideoSetState extends State<VideoSet> {
   List<String> interests = [];
+  List<String> autoInterests = [];
   bool isError = false;
   late String errMsg;
   late Timer timer;
@@ -54,40 +55,8 @@ class _VideoSetState extends State<VideoSet> {
     });
   }
 
-  List<String> autoInterests = [];
-  Future<List<String>> getInterests() async {
-    const String apiUrl = "https://netteam-backend-production.up.railway.app/getInterests";
-
-    try {
-      final response = await http.post(Uri.parse(apiUrl),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode(<String,dynamic>{
-            "_id": id,
-          })
-      );
-
-      if (response.statusCode == 200) {
-
-        final List<dynamic> data = jsonDecode(response.body);
-        return List<String>.from(data);
-
-      } else if (response.statusCode == 404) {
-        // Handle the error accordingly
-      } else {
-        // Other error occurred
-        // Handle the error accordingly
-      }
-    } catch (error) {
-      // Error occurred during the API call
-      // Handle the error accordingly
-    }
-    return [];
-  }
-
   @override
   Widget build(BuildContext context) {
-    id = Provider.of<MyDataContainer>(context).id;
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -265,16 +234,14 @@ class _VideoSetState extends State<VideoSet> {
                             fontSize: 15.sp),
                       ),
                       onPressed: () {
-                        getInterests().then((array) {
-                          setState(() {
-                            autoInterests = array;
-                          });
-                          Navigator.push(context,
-                              MaterialPageRoute(builder:
-                                  (context) => VideoCall(cameras: widget.cameras,interests: autoInterests)
-                              )
-                          );
+                        setState(() {
+                          autoInterests.addAll(Provider.of<MyDataContainer>(context, listen: false).interests);
                         });
+                        Navigator.push(context,
+                            MaterialPageRoute(builder:
+                                (context) => VideoCall(cameras: widget.cameras,interests: autoInterests)
+                            )
+                        );
                       },
                     ),
                   ),

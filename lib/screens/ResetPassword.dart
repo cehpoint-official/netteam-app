@@ -1,11 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 
 class ResetPassword extends StatefulWidget {
-  const ResetPassword({Key? key}) : super(key: key);
+  const ResetPassword({Key? key,required this.email}) : super(key: key);
+  final String email;
 
   @override
   State<ResetPassword> createState() => _ResetPasswordState();
@@ -19,6 +24,37 @@ class _ResetPasswordState extends State<ResetPassword> {
   bool _isError = false;
   String password = '';
   String password1 = '';
+
+  Future<void> setNewPassword() async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/change-password";
+
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "userId": widget.email,
+            "password": password,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          Navigator.pushNamed(context, "/login");
+        });
+      } else if (response.statusCode == 404) {
+        // User not found
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,7 +209,7 @@ class _ResetPasswordState extends State<ResetPassword> {
                               });
                             } else {
                               //Navigate to Home Screen
-                              Navigator.pushNamed(context, "/");
+                              setNewPassword();
                             }
                           },
                           style: ButtonStyle(

@@ -6,19 +6,21 @@ import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:netteam/screens/Search.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 import '../main.dart';
+import 'Chat.dart';
 import 'Followers-FollowinfDetails.dart';
 
-class AboutYou extends StatelessWidget {
-  const AboutYou({Key? key}) : super(key: key);
+class UserProfile extends StatelessWidget {
+  const UserProfile({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final name = Provider.of<MyDataContainer>(context,listen: false).name;
-    final dataContainer = Provider.of<MyDataContainer>(context,listen: false);
+    final User user = ModalRoute.of(context)!.settings.arguments as User;
     return Scaffold(
       appBar: AppBar(
         elevation: 0.0,
@@ -35,27 +37,17 @@ class AboutYou extends StatelessWidget {
         ),
         automaticallyImplyLeading: false,
         title: Text(
-          name,
+          user.userName,
           style: GoogleFonts.roboto(
               fontSize: 17.sp,
               color: Colors.white,
               fontWeight: FontWeight.w500),
         ),
         centerTitle: true,
-        actions: [
-          IconButton(
-              onPressed: () {
-                dataContainer.updateData("", "", "","", "", "", []);
-                Navigator.pushReplacementNamed(context, '/login');
-              },
-              icon: Icon(
-                Icons.logout_rounded,
-                color: Colors.white,
-                size: 20.h,
-              ))
-        ],
       ),
-      body: Body(),
+      body: Body(
+        user: user,
+      ),
       backgroundColor: const Color(0xFF0E0B1F),
       bottomNavigationBar: BottomAppBar(
         elevation: 0.0,
@@ -72,7 +64,7 @@ class AboutYou extends StatelessWidget {
                         size: 30.h, color: const Color(0xFFFFFFFF))),
                 onTap: () {
                   //Navigate to Home
-                  Navigator.pushNamed(context, "/");
+                  Navigator.pushReplacementNamed(context, "/");
                 },
               ),
               GestureDetector(
@@ -82,7 +74,7 @@ class AboutYou extends StatelessWidget {
                         size: 30.h, color: const Color(0xFFFFFFFF))),
                 onTap: () {
                   //Navigate to Video Call
-                  Navigator.pushNamed(context, "/videoset");
+                  Navigator.pushReplacementNamed(context, "/videoset");
                 },
               ),
               GestureDetector(
@@ -92,7 +84,7 @@ class AboutYou extends StatelessWidget {
                         size: 30.h, color: const Color(0xFFFFFFFF))),
                 onTap: () {
                   //Navigate to Add tiktok
-                  Navigator.pushNamed(context, "/create");
+                  Navigator.pushReplacementNamed(context, "/create");
                 },
               ),
               GestureDetector(
@@ -102,7 +94,7 @@ class AboutYou extends StatelessWidget {
                         size: 30.h, color: const Color(0xFFFFFFFF))),
                 onTap: () {
                   //Navigate to chat
-                  Navigator.pushNamed(context, "/chatlist");
+                  Navigator.pushReplacementNamed(context, "/chatlist");
                 },
               ),
               GestureDetector(
@@ -112,6 +104,7 @@ class AboutYou extends StatelessWidget {
                         size: 30.h, color: const Color(0xFF1EA7D7))),
                 onTap: () {
                   //Navigate to Account section
+                  Navigator.pushReplacementNamed(context, '/aboutyou');
                 },
               ),
             ],
@@ -123,7 +116,8 @@ class AboutYou extends StatelessWidget {
 }
 
 class Body extends StatefulWidget {
-  const Body({Key? key}) : super(key: key);
+  const Body({Key? key, required this.user}) : super(key: key);
+  final User user;
 
   @override
   State<Body> createState() => _BodyState();
@@ -132,21 +126,24 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   PageController pageController = PageController(initialPage: 0);
   int pageIndex = 0;
+  String? baseUrl = dotenv.env['BACKEND_URL'];
   List<dynamic> posts = [];
   List<dynamic> saved = [];
   List<dynamic> followers = [];
   List<dynamic> following = [];
-  late String id,userId,profilePic;
-  String? baseUrl = dotenv.env['BACKEND_URL'];
+  IO.Socket socket = IO.io(dotenv.env['BACKEND_URL'],<String, dynamic>{
+    'transports': ['websocket'],
+    'autoConnect': false,
+  });
 
-  Future<void> getPostsAndSaved() async {
+  Future<void> getDetails() async {
     String apiUrl = "${dotenv.env['BACKEND_URL']}/getPostsAndSaved";
     try {
       final response = await http.post(Uri.parse(apiUrl),
           headers: {'Content-Type': 'application/json'},
           body: json.encode(<String,dynamic>{
-            "userId": id,
-            "reqId": id,
+            "userId": widget.user.objectId,
+            "reqId": Provider.of<MyDataContainer>(context,listen: false).id,
           })
       );
 
@@ -174,16 +171,57 @@ class _BodyState extends State<Body> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    id = Provider.of<MyDataContainer>(context,listen: false).id;
-    userId = Provider.of<MyDataContainer>(context,listen: false).userId;
-    profilePic = Provider.of<MyDataContainer>(context,listen: false).profilePic;
-    getPostsAndSaved();
+    socket.connect();
+    getDetails();
+  }
+
+  Future<void> changeFollow() async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/follow";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "_id": widget.user.objectId,
+            "reqId": Provider.of<MyDataContainer>(context,listen: false).id,
+            "followStatus": widget.user.isFollowing
+          })
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          widget.user.isFollowing = !widget.user.isFollowing;
+        });
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    socket.dispose();
+    super.dispose();
+  }
+
+  bool chatOpened = false;
+  void handleChatClosed(bool isOpened) {
+    // Handle the chat state here
+    if (!isOpened) {
+      chatOpened = false;
+    }
   }
 
   _getImageProvider() {
-    return profilePic != ""
-        ? NetworkImage('${dotenv.env['BACKEND_URL']}/$profilePic')
-        : const AssetImage("assets/images/avatar.jpg");
+    return Uri.parse(widget.user.imagePath).isAbsolute
+        ? NetworkImage(widget.user.imagePath)
+        : AssetImage(widget.user.imagePath);
   }
 
   @override
@@ -200,15 +238,30 @@ class _BodyState extends State<Body> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircleAvatar(
-                    radius: 48.r,
-                    backgroundImage: _getImageProvider(),
+                GestureDetector(
+                  onTap: () {
+                    if (widget.user.isLive) {
+                      Navigator.pushNamed(context, '/viewerslive');
+                    }
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: (widget.user.isLive)
+                            ? Border.all(
+                                width: 5.0, color: const Color(0xFF1EA7D7))
+                            : Border.all()),
+                    child: CircleAvatar(
+                        radius: 48.r,
+                        backgroundImage: _getImageProvider(),
+                    ),
+                  ),
                 ),
                 SizedBox(
                   height: 10.h,
                 ),
                 Text(
-                  '@$userId',
+                  widget.user.userId,
                   style: GoogleFonts.roboto(
                       fontSize: 17.sp,
                       fontWeight: FontWeight.w400,
@@ -221,10 +274,10 @@ class _BodyState extends State<Body> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     GestureDetector(
-                      onTap: () {
+                      onTap: (){
                         Navigator.push(context,
                             MaterialPageRoute(builder:
-                                (context) => FollowersFollowing(fancyId: userId,followers: followers,following: following)
+                                (context) => FollowersFollowing(fancyId: widget.user.userId,followers: followers,following: following)
                             )
                         );
                       },
@@ -257,7 +310,7 @@ class _BodyState extends State<Body> {
                       onTap: (){
                         Navigator.push(context,
                             MaterialPageRoute(builder:
-                                (context) => FollowersFollowing(fancyId: userId,followers: followers,following: following)
+                                (context) => FollowersFollowing(fancyId: widget.user.userId,followers: followers,following: following)
                             )
                         );
                       },
@@ -316,25 +369,61 @@ class _BodyState extends State<Body> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(5.r)),
-                          border: Border.all(color: Colors.white, width: 1)),
+                      decoration: (widget.user.isFollowing)
+                          ? BoxDecoration(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5.r)),
+                              border: Border.all(color: Colors.white, width: 1))
+                          : BoxDecoration(
+                              color: Colors.white,
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5.r)),
+                            ),
                       height: 36.h,
-                      width: 150.w,
+                      width: 125.w,
                       child: ElevatedButton(
                         style: ButtonStyle(
                           elevation: MaterialStateProperty.all(0.0),
                           backgroundColor:
                               MaterialStateProperty.all(Colors.transparent),
                         ),
-                        child: Text("Edit Profile"),
+                        child: Text(
+                          widget.user.isFollowing ? "Following" : "Follow",
+                          style: (widget.user.isFollowing)
+                              ? GoogleFonts.poppins(color: Colors.white)
+                              : GoogleFonts.poppins(color: Colors.black),
+                        ),
                         onPressed: () {
-                          Navigator.pushNamed(context, "/profile");
+                          changeFollow();
                         },
                       ),
                     ),
                     SizedBox(
                       width: 10.w,
+                    ),
+                    Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.all(Radius.circular(5.r)),
+                          border: Border.all(color: Colors.white, width: 1)),
+                      height: 36.h,
+                      width: 125.w,
+                      child: ElevatedButton(
+                        style: ButtonStyle(
+                          elevation: MaterialStateProperty.all(0.0),
+                          backgroundColor:
+                              MaterialStateProperty.all(Colors.transparent),
+                        ),
+                        child: Text("Message"),
+                        onPressed: () {
+                          //Navigate to chat screen
+                          chatOpened = true;
+                          Navigator.push(context,
+                              MaterialPageRoute(builder:
+                                  (context) => Chat(socket: socket,handleChatClosed: handleChatClosed,name: widget.user.userName,userID: widget.user.objectId,)
+                              )
+                          );
+                        },
+                      ),
                     ),
                   ],
                 )

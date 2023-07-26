@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -32,7 +33,7 @@ class _LoginState extends State<Login> {
   }
 
   Future<void> _login() async {
-    const String apiUrl = "https://netteam-backend-production.up.railway.app/login";
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/login";
 
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -46,9 +47,11 @@ class _LoginState extends State<Login> {
       if (response.statusCode == 200) {
         // Login successful, process the response data
         // print(myData.id);
-        dataContainer.updateData(json.decode(response.body)["_id"]);
-        Navigator.pop(context);
-        Navigator.pushNamed(context, "/");
+        final data = json.decode(response.body);
+        dataContainer.updateData(data["_id"],data["name"],data["profilePic"],data["fancyId"],data["userId"],data["socialId"],List<String>.from(data["interests"]));
+        setState(() {
+          Navigator.pushReplacementNamed(context, "/");
+        });
         // Handle the response data according to your needs
         // e.g., store user data in shared preferences, navigate to home screen, etc.
       } else if (response.statusCode == 404) {
@@ -180,7 +183,7 @@ class _LoginState extends State<Login> {
                 child: ElevatedButton(
                   onPressed: () async {
                     //Backend Work
-                    await _login();
+                    _login();
                   },
                   style: ButtonStyle(
                       backgroundColor: MaterialStateProperty.all<Color>(

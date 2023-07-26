@@ -4,6 +4,7 @@ import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -46,7 +47,7 @@ class _SignUpState extends State<SignUp> {
   }
 
   Future<void> signUp(String username, String email, String password) async {
-    var url = Uri.parse('https://netteam-backend-production.up.railway.app/signup'); // Replace with your API endpoint URL
+    var url = Uri.parse('${dotenv.env['BACKEND_URL']}/signup'); // Replace with your API endpoint URL
     var requestBody = json.encode({
       'name': username,
       'userId': email,
@@ -60,8 +61,7 @@ class _SignUpState extends State<SignUp> {
     if (response.statusCode == 200) {
       // Signup successful
       print('Signup successful');
-
-      dataContainer.updateData(json.decode(response.body)["_id"]);
+      dataContainer.updateData(json.decode(response.body)["_id"],"","","","","",[]);
       Navigator.pop(context);
       Navigator.pushNamed(context, "/interests");
     } else {

@@ -1,6 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
+import 'package:netteam/screens/Verify.dart';
 
 class ForgotPassword extends StatefulWidget {
   const ForgotPassword({Key? key}) : super(key: key);
@@ -9,8 +14,41 @@ class ForgotPassword extends StatefulWidget {
   State<ForgotPassword> createState() => _ForgotPasswordState();
 }
 
+
 class _ForgotPasswordState extends State<ForgotPassword> {
   final TextEditingController _emailController = TextEditingController();
+
+  Future<void> verifyEmail() async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/verify-email";
+
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "userId": _emailController.text,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          Navigator.push(context,
+              MaterialPageRoute(builder:
+                  (context) => Verify(email: _emailController.text)
+              )
+          );
+        });
+      } else if (response.statusCode == 404) {
+        // User not found
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,9 +117,6 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                 borderSide:
                                     BorderSide(color: Color(0xFF9F9F9F)))),
                         keyboardType: TextInputType.emailAddress,
-                        onChanged: (value) {
-                          final email = _emailController.text;
-                        },
                       ),
                     ),
                   ],
@@ -97,7 +132,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       width: 295.w,
                       child: ElevatedButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, "/verify");
+                          verifyEmail();
                         },
                         style: ButtonStyle(
                             backgroundColor: MaterialStateProperty.all<Color>(
