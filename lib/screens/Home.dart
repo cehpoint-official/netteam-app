@@ -7,17 +7,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cupertino_icons/cupertino_icons.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
-class ApiService {
-  static const String baseUrl = 'https://netteam-backend-production.up.railway.app';
+import '../main.dart';
 
-  Future<List<dynamic>> fetchReels() async {
-    final response = await http.get(Uri.parse('$baseUrl/reels'));
+class ApiService {
+  static String? baseUrl = dotenv.env['BACKEND_URL'];
+
+  Future<List<dynamic>> fetchReels(String userId) async {
+    final response = await http.post(Uri.parse('$baseUrl/reels'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(<String,dynamic>{
+          "userId": userId,
+        })
+    );
     if (response.statusCode == 200) {
       // print(response.body);
       final data = json.decode(response.body);
@@ -43,14 +52,14 @@ class ScreenArguments {
 
 class _HomeState extends State<Home> {
   final PageController _controller = PageController(viewportFraction: 1);
-  bool isLiked = false;
-  bool isSaved = false;
   bool isShared = false;
+  late String reelId;
+  late String id;
 
   final apiService = ApiService();
   List<dynamic> reels = [];
   Future<void> fetchReels() async {
-    final fetchedReels = await apiService.fetchReels();
+    final fetchedReels = await apiService.fetchReels(id);
     setState(() {
       reels = fetchedReels;
     });
@@ -62,6 +71,7 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    id = Provider.of<MyDataContainer>(context,listen: false).id;
     fetchReels();
   }
 
@@ -100,6 +110,58 @@ class _HomeState extends State<Home> {
     super.dispose();
   }
 
+  Future<void> likeButtonPressed(bool isLiked) async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/like";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "videoId": reelId,
+            "userId": id,
+            "likedStatus": isLiked,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
+
+  Future<void> savedButtonPressed(bool isSaved) async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/save";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "videoId": reelId,
+            "userId": id,
+            "savedStatus": isSaved,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,11 +169,11 @@ class _HomeState extends State<Home> {
           child: Stack(
             children: [
               GestureDetector(
-                onDoubleTap: () {
-                  setState(() {
-                    isLiked = !isLiked;
-                  });
-                },
+                // onDoubleTap: () {
+                //   setState(() {
+                //     isLiked = !isLiked;
+                //   });
+                // },
                 child: PageView.builder(
                   scrollDirection: Axis.vertical,
                   controller: _controller,
@@ -137,6 +199,9 @@ class _HomeState extends State<Home> {
                       future: VideoPlayerController.network(videoUrl).initialize(),
                       builder: (context, snapshot) {
                         final isVideoLoaded = snapshot.connectionState == ConnectionState.done;
+                        reelId = reel["_id"];
+                        // isLiked = reel["likedStatus"];
+                        // isSaved = reel["savedStatus"];
 
                         if (index != _currentPlayingIndex) {
                           _videoController.pause();
@@ -178,13 +243,22 @@ class _HomeState extends State<Home> {
                                                 child: Image.asset(
                                                   "assets/images/profile_pic.png",
                                                   fit: BoxFit.cover,
-                                                ),
+                                                )
+                                                // reel["profilePic"] != ""
+                                                //     ? Image.network(
+                                                //       '${dotenv.env['BACKEND_URL']}/${reel["profilePic"]}',
+                                                //       fit: BoxFit.cover,
+                                                //     )
+                                                //     : Image.asset(
+                                                //       "assets/images/avatar.jpg",
+                                                //   fit: BoxFit.cover,
+                                                // ),
                                               ),
                                               SizedBox(
                                                 width: 10.w,
                                               ),
                                               Text(
-                                              "@iamaswin",
+                                              '@${reel["authorName"]}',
                                                 style: GoogleFonts.roboto(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 15.sp,
@@ -195,7 +269,7 @@ class _HomeState extends State<Home> {
                                           SizedBox(
                                             width: 280.w,
                                             child: Text(
-                                              "Spinning through the city of angels: LA's iconic roundabout takes traffic for a whirl",
+                                              reel["description"],
                                               style: GoogleFonts.roboto(
                                                   fontSize: 12.sp,
                                                   fontWeight: FontWeight.normal,
@@ -214,13 +288,20 @@ class _HomeState extends State<Home> {
                                             children: [
                                               IconButton(
                                                   onPressed: () {
-                                                    showAlertDialog(context, "This Feature is Under Development");
-                                                    setState(() {
-                                                      isLiked = !isLiked;
-                                                    });
+                                                      likeButtonPressed(reel["likedStatus"]).then((_) => {
+                                                        setState(() {
+                                                          if(reel["likedStatus"]){
+                                                            reel["likedStatus"] = false;
+                                                            reel["likesCount"] -= 1;
+                                                          }else {
+                                                            reel["likedStatus"] = true;
+                                                            reel["likesCount"] += 1;
+                                                          }
+                                                        })
+                                                      });
                                                   },
                                                   icon: Icon(
-                                                    isLiked
+                                                    reel["likedStatus"]
                                                         ? CupertinoIcons.heart_fill
                                                         : CupertinoIcons.heart,
                                                     size: 30.h,
@@ -228,7 +309,7 @@ class _HomeState extends State<Home> {
                                                   )
                                               ),
                                               Text(
-                                                "31K",
+                                                reel["likesCount"].toString(),
                                                 style: GoogleFonts.roboto(
                                                     fontSize: 12.sp,
                                                     color: Colors.white,
@@ -252,9 +333,8 @@ class _HomeState extends State<Home> {
                                                         backgroundColor:
                                                         Colors.transparent,
                                                         builder: (BuildContext context) {
-                                                          return CommentSection();
+                                                          return CommentSection(reelId: reelId);
                                                         });
-                                                    showAlertDialog(context, "This Feature is Under Development");
                                                   },
                                                   child: Image.asset(
                                                     "assets/icons/comment.png",
@@ -263,7 +343,7 @@ class _HomeState extends State<Home> {
                                                   )
                                               ),
                                               Text(
-                                                "2K",
+                                                reel["commentsCount"].toString(),
                                                 style: GoogleFonts.roboto(
                                                     fontSize: 12.sp,
                                                     color: Colors.white,
@@ -279,13 +359,22 @@ class _HomeState extends State<Home> {
                                             children: [
                                               IconButton(
                                                   onPressed: () {
-                                                    showAlertDialog(context, "This Feature is Under Development");
                                                     setState(() {
-                                                     isSaved = !isSaved;
+                                                      savedButtonPressed(reel["savedStatus"]).then((_) => {
+                                                        setState(() {
+                                                          if(reel["savedStatus"]){
+                                                            reel["savedStatus"] = false;
+                                                            reel["savedByCount"] -= 1;
+                                                          }else {
+                                                            reel["savedStatus"] = true;
+                                                            reel["savedByCount"] += 1;
+                                                          }
+                                                        })
+                                                      });
                                                     });
                                                   },
                                                   icon: Icon(
-                                                    isSaved
+                                                    reel["savedStatus"]
                                                         ? Icons.bookmark
                                                         : Icons.bookmark_outline,
                                                     size: 30.h,
@@ -293,7 +382,7 @@ class _HomeState extends State<Home> {
                                                   )
                                               ),
                                               Text(
-                                                "4K",
+                                                reel["savedByCount"].toString(),
                                                 style: GoogleFonts.roboto(
                                                     fontSize: 12.sp,
                                                     color: Colors.white,
@@ -310,24 +399,6 @@ class _HomeState extends State<Home> {
                                               SizedBox(
                                                 height: 5.h,
                                               ),
-                                              GestureDetector(
-                                                  onTap: () {
-                                                    showAlertDialog(context, "This Feature is Under Development");
-                                                  },
-                                                  child: Image.asset(
-                                                    "assets/icons/share.png",
-                                                    height: 30.h,
-                                                    width: 30.h,
-                                                  )
-                                              ),
-                                              Text(
-                                                "5K",
-                                                style: GoogleFonts.roboto(
-                                                    fontSize: 12.sp,
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold
-                                                ),
-                                              )
                                             ],
                                           ),
                                         )
@@ -383,8 +454,8 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFF1EA7D7))),
                   onTap: () {
                     //Navigate to Home
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, "/");
+                    // Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, "/");
                   },
                 ),
                 GestureDetector(
@@ -394,8 +465,8 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to Video Call
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, "/videoset");
+                    // Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, "/videoset");
                   },
                 ),
                 GestureDetector(
@@ -405,8 +476,8 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to Add tiktok
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, "/create");
+                    // Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, "/create");
                     showAlertDialog(context, "This Feature is Under Development");
                   },
                 ),
@@ -417,9 +488,8 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to chat
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, "/chatlist");
-                    showAlertDialog(context, "This Feature is Under Development");
+                    // Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, "/chatlist");
                   },
                 ),
                 GestureDetector(
@@ -429,9 +499,8 @@ class _HomeState extends State<Home> {
                           size: 30.h, color: const Color(0xFFFFFFFF))),
                   onTap: () {
                     //Navigate to Account section
-                    Navigator.pop(context);
-                    Navigator.pushNamed(context, "/aboutyou");
-                    showAlertDialog(context, "This Feature is Under Development");
+                    // Navigator.pop(context);
+                    Navigator.pushReplacementNamed(context, "/aboutyou");
                   },
                 ),
               ],
@@ -446,13 +515,15 @@ class _HomeState extends State<Home> {
 
 //Class for Comment
 class Comment {
+  String commentId;
   String imageUrl;
   String userName;
   String comment;
   int noOfLikes;
   bool isLiked;
   Comment(
-      {required this.imageUrl,
+      {required this.commentId,
+        required this.imageUrl,
       required this.userName,
       required this.comment,
       this.noOfLikes = 0,
@@ -460,39 +531,16 @@ class Comment {
 }
 
 class CommentSection extends StatefulWidget {
-  const CommentSection({Key? key}) : super(key: key);
+  const CommentSection({Key? key,required this.reelId}) : super(key: key);
+  final String reelId;
 
   @override
   State<CommentSection> createState() => _CommentSectionState();
 }
 
 class _CommentSectionState extends State<CommentSection> {
-  final List<Comment> _commentList = <Comment>[
-    Comment(
-      imageUrl: "assets/images/profile1.png",
-      userName: "iamraj",
-      comment: "Wow nice!",
-      noOfLikes: 10,
-    ),
-    Comment(
-      imageUrl: "assets/images/profile2.png",
-      userName: "iamkumar",
-      comment: "It's a nice place",
-      noOfLikes: 30,
-    ),
-    Comment(
-      imageUrl: "assets/images/profile3.png",
-      userName: "thanos",
-      comment: "Great",
-      noOfLikes: 20,
-    ),
-    Comment(
-      imageUrl: "assets/images/profile4.png",
-      userName: "iamraj",
-      comment: "Wow, beautiful place",
-      noOfLikes: 10,
-    ),
-  ];
+  final List<Comment> _commentList = <Comment>[];
+  late String id,name,profilePic,userId;
 
   TextEditingController _textEditingController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -505,20 +553,130 @@ class _CommentSectionState extends State<CommentSection> {
     );
   }
 
-  void addComment() {
-    if (_textEditingController.text != '') {
-      setState(() {
-        _commentList.add(Comment(
-            imageUrl: "assets/images/profile4.png",
-            userName: "iamaswin",
+  Future<void> postComment() async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/postComment";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "videoId": widget.reelId,
+            "author": id,
+            "comment": _textEditingController.text
+          })
+      );
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          _commentList.add(Comment(
+            commentId: data,
+            imageUrl: profilePic != "" ? '${dotenv.env['BACKEND_URL']}/$profilePic' : "assets/images/avatar.jpg",
+            userName: userId,
             comment: _textEditingController.text,
             noOfLikes: 0,
-            isLiked: false));
-      });
-      _textEditingController.text = '';
-      FocusScope.of(context).unfocus();
-      _scrollToBottom();
+            isLiked: false,
+          ));
+        });
+        _textEditingController.text = '';
+        FocusScope.of(context).unfocus();
+        _scrollToBottom();
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
     }
+  }
+
+  void addComment() {
+    if (_textEditingController.text != '') {
+      postComment();
+    }
+  }
+
+  Future<void> getComments() async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/getComments";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "videoId": widget.reelId,
+            "userId": id,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          data.forEach((comment) {
+            _commentList.add(Comment(
+              commentId: comment["_id"],
+              imageUrl: comment["profilePic"] != "" ? '${dotenv.env['BACKEND_URL']}/${comment["profilePic"]}' : "assets/images/avatar.jpg",
+              userName: comment["authorName"],
+              comment: comment["comment"],
+              noOfLikes: comment["likesCount"],
+              isLiked: comment["likedStatus"],
+            ));
+          });
+        });
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    id = Provider.of<MyDataContainer>(context,listen: false).id;
+    name = Provider.of<MyDataContainer>(context,listen: false).name;
+    userId = Provider.of<MyDataContainer>(context,listen: false).userId;
+    profilePic = Provider.of<MyDataContainer>(context,listen: false).profilePic;
+    getComments();
+  }
+
+  Future<void> likeComment(String commentId, bool isLiked) async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/likeComment";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "videoId": widget.reelId,
+            "commentId": commentId,
+            "userId": id,
+            "likedStatus": isLiked,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
+
+  _getImageProvider(Comment comment) {
+    return Uri.parse(comment.imageUrl).isAbsolute
+        ? NetworkImage(comment.imageUrl)
+        : AssetImage(comment.imageUrl);
   }
 
   @override
@@ -547,7 +705,7 @@ class _CommentSectionState extends State<CommentSection> {
                 Comment _comment = _commentList[index];
                 return ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: AssetImage(_comment.imageUrl),
+                    backgroundImage: _getImageProvider(_comment),
                     radius: 20.r,
                   ),
                   title: Text("@${_comment.userName}"),
@@ -556,14 +714,15 @@ class _CommentSectionState extends State<CommentSection> {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          setState(() {
-                            if (_commentList[index].isLiked) {
-                              _commentList[index].noOfLikes--;
-                            } else {
-                              _commentList[index].noOfLikes++;
-                            }
-                            _commentList[index].isLiked =
-                                !_commentList[index].isLiked;
+                          likeComment(_commentList[index].commentId,_commentList[index].isLiked).then((_) {
+                            setState(() {
+                              if (_commentList[index].isLiked) {
+                                _commentList[index].noOfLikes--;
+                              } else {
+                                _commentList[index].noOfLikes++;
+                              }
+                              _commentList[index].isLiked = !_commentList[index].isLiked;
+                            });
                           });
                         },
                         child: Icon(

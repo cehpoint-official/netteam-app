@@ -1,11 +1,18 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+
+
+import '../main.dart';
 
 class Profile extends StatelessWidget {
   const Profile({Key? key}) : super(key: key);
@@ -92,11 +99,45 @@ class Body extends StatefulWidget {
 
 class _BodyState extends State<Body> {
   //Initial profile pic. Get from the server
-  String imagePath = "assets/images/ProfilePic.png";
-  String name = "Aswin";
-  String userID = "aswin.code";
-  String email = "aswin@gmail.com";
-  String socialURL = "facebook.com/aswin";
+  late String id,name,userID,email,socialURL;
+  String imagePath = "assets/images/avatar.jpg";
+  late List<String> interests;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    id = Provider.of<MyDataContainer>(context,listen: false).id;
+    name = Provider.of<MyDataContainer>(context,listen: false).name;
+    userID = Provider.of<MyDataContainer>(context,listen: false).userId;
+    email = Provider.of<MyDataContainer>(context,listen: false).userEmail;
+    socialURL = Provider.of<MyDataContainer>(context,listen: false).socialUrl;
+  }
+
+  Future<void> updateName(String newName) async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/updateName";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "_id": id,
+            "name": newName,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
 
   //For Changing Name
   void changeName() async {
@@ -121,6 +162,8 @@ class _BodyState extends State<Body> {
               child: Text('Save'),
               onPressed: () {
                 Navigator.of(context).pop(nameController.text);
+                Provider.of<MyDataContainer>(context,listen: false).name = nameController.text;
+                updateName(nameController.text);
               },
             ),
           ],
@@ -132,6 +175,31 @@ class _BodyState extends State<Body> {
       setState(() {
         name = enteredName;
       });
+    }
+  }
+
+  Future<void> updateFancyId(String newFancyId) async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/updateFancyId";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "_id": id,
+            "fancyId": newFancyId,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
     }
   }
 
@@ -159,6 +227,8 @@ class _BodyState extends State<Body> {
               child: Text('Save'),
               onPressed: () {
                 Navigator.of(context).pop(userIDController.text);
+                Provider.of<MyDataContainer>(context,listen: false).userId = userIDController.text;
+                updateFancyId(userIDController.text);
               },
             ),
           ],
@@ -170,6 +240,31 @@ class _BodyState extends State<Body> {
       setState(() {
         userID = enteredUserID;
       });
+    }
+  }
+
+  Future<void> updateEmail(String newEmail) async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/updateEmail";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "_id": id,
+            "userId": newEmail,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
     }
   }
 
@@ -197,6 +292,8 @@ class _BodyState extends State<Body> {
               child: Text('Save'),
               onPressed: () {
                 Navigator.of(context).pop(userIDController.text);
+                Provider.of<MyDataContainer>(context,listen: false).userEmail = userIDController.text;
+                updateEmail(userIDController.text);
               },
             ),
           ],
@@ -208,6 +305,31 @@ class _BodyState extends State<Body> {
       setState(() {
         email = enteredEmailID;
       });
+    }
+  }
+
+  Future<void> updateSocial(String newSocial) async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/updateSocial";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "_id": id,
+            "socialId": newSocial,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        return;
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
     }
   }
 
@@ -235,6 +357,8 @@ class _BodyState extends State<Body> {
               child: Text('Save'),
               onPressed: () {
                 Navigator.of(context).pop(userIDController.text);
+                Provider.of<MyDataContainer>(context,listen: false).socialUrl = userIDController.text;
+                updateSocial(userIDController.text);
               },
             ),
           ],
@@ -265,6 +389,7 @@ class _BodyState extends State<Body> {
 
   @override
   Widget build(BuildContext context) {
+    interests = Provider.of<MyDataContainer>(context).interests;
     return SafeArea(
         child: Container(
       height: double.infinity,
@@ -504,7 +629,7 @@ class _BodyState extends State<Body> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, "/interests");
+                      Navigator.pushReplacementNamed(context, "/interests");
                     },
                     child: Container(
                       height: 40.h,
@@ -525,7 +650,7 @@ class _BodyState extends State<Body> {
                                 fontWeight: FontWeight.w400),
                           ),
                           Text(
-                            "Professional - Student - General",
+                            interests.join(" - "),
                             style: GoogleFonts.roboto(
                                 fontWeight: FontWeight.w400,
                                 fontSize: 15.sp,

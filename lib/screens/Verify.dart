@@ -1,26 +1,70 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_pin_code_fields/flutter_pin_code_fields.dart';
+import 'package:http/http.dart' as http;
+import 'package:netteam/screens/ResetPassword.dart';
 
 class Verify extends StatefulWidget {
-  const Verify({Key? key}) : super(key: key);
+  const Verify({Key? key,required this.email}) : super(key: key);
+  final String email;
 
   @override
   State<Verify> createState() => _VerifyState();
 }
 
 class _VerifyState extends State<Verify> {
-  final TextEditingController firstDigit = TextEditingController();
-  final TextEditingController secondDigit = TextEditingController();
-  final TextEditingController thirdDigit = TextEditingController();
-  final TextEditingController fourthDigit = TextEditingController();
+  TextEditingController newTextEditingController = TextEditingController();
+  FocusNode focusNode = FocusNode();
+  late String OTP;
+
+  Future<String> sendEmail() async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/send-email";
+
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "email": widget.email,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        final otp = json.decode(response.body);
+        return otp;
+      } else if (response.statusCode == 404) {
+        // User not found
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+    return "";
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    sendEmail().then((otp) => {
+      if(otp != ""){
+        OTP = otp
+      }
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
-    TextEditingController newTextEditingController = TextEditingController();
-    FocusNode focusNode = FocusNode();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF0E0B1F),
@@ -93,7 +137,13 @@ class _VerifyState extends State<Verify> {
                         width: 295.w,
                         child: ElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, "/resetpassword");
+                            if(OTP == newTextEditingController.text){
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder:
+                                      (context) => ResetPassword(email: widget.email)
+                                  )
+                              );
+                            }
                           },
                           style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(
@@ -119,7 +169,13 @@ class _VerifyState extends State<Verify> {
                         height: 46.h,
                         width: 295.w,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            sendEmail().then((otp) => {
+                              if(otp != ""){
+                                OTP = otp
+                              }
+                            });
+                          },
                           style: ButtonStyle(
                               backgroundColor: MaterialStateProperty.all<Color>(
                                   const Color(0xFF0E0B1F))),

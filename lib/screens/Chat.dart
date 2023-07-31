@@ -1,17 +1,65 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:http/http.dart' as http;
+import './Search.dart';
+
+import '../main.dart';
 
 class Chat extends StatelessWidget {
-  static const String name = "Aswin Raaj";
-  Chat({Key? key,required this.socket,required this.handleChatClosed}) : super(key: key);
+  Chat({Key? key,required this.socket,required this.handleChatClosed,required this.name,required this.userID}) : super(key: key);
   IO.Socket socket;
   final Function(bool isOpened) handleChatClosed;
+  final String name;
+  final String userID;
+  late String id;
+
+  Future<User> getUserDetail() async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/getUserProfile";
+    late User user;
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "_id": userID,
+            "reqId": id,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        user = User(
+              objectId: data["_id"],
+              userId: data["fancyId"],
+              userName: data["name"],
+              imagePath: "assets/images/profile6.png",
+              isLive: data["live"],
+              isFollowing: data["following"]
+        );
+        return user;
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+    return user;
+  }
 
   @override
   Widget build(BuildContext context) {
+    id = Provider.of<MyDataContainer>(context,listen: false).id;
     return Scaffold(
       backgroundColor: const Color(0xFF0E0B1F),
       appBar: AppBar(
@@ -68,6 +116,9 @@ class Chat extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       //Navigate to profile
+                      getUserDetail().then((user) {
+                        Navigator.pushNamed(context, '/userprofile', arguments: user);
+                      });
                     },
                     style: ButtonStyle(
                         backgroundColor:
@@ -87,20 +138,13 @@ class Chat extends StatelessWidget {
           IconButton(
               onPressed: () {},
               icon: Icon(
-                Icons.share_outlined,
-                size: 20.h,
-              )
-          ),
-          IconButton(
-              onPressed: () {},
-              icon: Icon(
                 Icons.more_vert,
                 size: 20.h,
               )
           ),
         ],
       ),
-      body: Body(socket: socket,handleChatClosed: handleChatClosed,),
+      body: Body(socket: socket,handleChatClosed: handleChatClosed,userID: userID),
     );
   }
 }
@@ -112,31 +156,23 @@ class ChatMessage {
 }
 
 class Body extends StatefulWidget {
-  Body({Key? key,required this.socket,required this.handleChatClosed}) : super(key: key);
+  Body({Key? key,required this.socket,required this.handleChatClosed,required this.userID}) : super(key: key);
   IO.Socket socket;
   final Function(bool isOpened) handleChatClosed;
+  final String userID;
 
   @override
   State<Body> createState() => _BodyState();
 }
 
 class _BodyState extends State<Body> {
-  final int userID = 2; // Should take from the cookies
+  late String id;
   final String user1Number = "+91 9239239230";
   final String user2Number = "+91 678678678";
 
   bool isRequestVisible = false;
 
-  final List<ChatMessage> _chatList = <ChatMessage>[
-    ChatMessage(
-        userID: 1,
-        text:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt "),
-    ChatMessage(
-        userID: 2,
-        text:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt "),
-  ];
+  final List<ChatMessage> _chatList = <ChatMessage>[];
 
   TextEditingController _textEditingController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -149,21 +185,84 @@ class _BodyState extends State<Body> {
     );
   }
 
+  Future<void> storeMessages() async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/sendMessage";
+
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "from": id,
+            "to": widget.userID,
+            "message": _textEditingController.text,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        setState(() {
+          _chatList.add(ChatMessage(userID: 2, text: _textEditingController.text));
+          widget.socket.emit("message",_textEditingController.text);
+        });
+        _textEditingController.text = '';
+        FocusScope.of(context).unfocus();
+        _scrollToBottom();
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+  }
+
   void addText() {
     if (_textEditingController.text != '') {
-      setState(() {
-        _chatList.add(ChatMessage(userID: 2, text: _textEditingController.text));
-        widget.socket.emit("message",_textEditingController.text);
-      });
-      _textEditingController.text = '';
-      FocusScope.of(context).unfocus();
-      _scrollToBottom();
+      storeMessages();
     }
+  }
+
+  Future<List<dynamic>> getMessages() async {
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/retriveMessage";
+    try {
+      final response = await http.post(Uri.parse(apiUrl),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode(<String,dynamic>{
+            "from": id,
+            "to": widget.userID,
+          })
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return data;
+      } else if (response.statusCode == 404) {
+        // Handle the error accordingly
+      } else {
+        // Other error occurred
+        // Handle the error accordingly
+      }
+    } catch (error) {
+      // Error occurred during the API call
+      // Handle the error accordingly
+    }
+    return [];
   }
 
   @override
   void initState() {
     super.initState();
+    id = Provider.of<MyDataContainer>(context,listen: false).id;
+    getMessages().then((chatHistory) {
+      setState(() {
+        chatHistory.forEach((message) =>
+            _chatList.add(ChatMessage(userID: (message["from"] == id) ? 2 : 1,
+                text: message["message"]))
+        );
+      });
+    });
     widget.socket.on("message",(data) {
       setState(() {
         _chatList.add(ChatMessage(userID: 1, text: data));
@@ -207,6 +306,7 @@ class _BodyState extends State<Body> {
 
   @override
   Widget build(BuildContext context) {
+
     return Container(
       height: double.infinity,
       padding: EdgeInsets.fromLTRB(15.w, 0, 15.w, 10.h),
@@ -319,7 +419,7 @@ class _BodyState extends State<Body> {
                   itemBuilder: (BuildContext context, int index) {
                     ChatMessage chatMessage = _chatList[index];
                     return Row(
-                      mainAxisAlignment: (userID == chatMessage.userID)
+                      mainAxisAlignment: (2 == chatMessage.userID)
                           ? MainAxisAlignment.end
                           : MainAxisAlignment.start,
                       children: [
@@ -334,7 +434,7 @@ class _BodyState extends State<Body> {
                             constraints: BoxConstraints(maxWidth: 270.w),
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8.r),
-                              color: (userID == chatMessage.userID)
+                              color: (2 == chatMessage.userID)
                                   ? const Color(0xFF272A35)
                                   : const Color(0xFF1A172E),
                             ),

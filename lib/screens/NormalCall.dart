@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
@@ -31,7 +32,7 @@ class _NormalCallState extends State<NormalCall> {
   final _remoteRenderer = RTCVideoRenderer();
   RTCPeerConnection? _peer;
   // 'https://netteam-backend-production.up.railway.app'
-  IO.Socket socket = IO.io('https://netteam-backend-production.up.railway.app',<String, dynamic>{
+  IO.Socket socket = IO.io(dotenv.env['BACKEND_URL'],<String, dynamic>{
     'transports': ['websocket'],
     'autoConnect': false,
   });
@@ -96,7 +97,7 @@ class _NormalCallState extends State<NormalCall> {
       }
 
       _localRenderer.srcObject = stream;
-      if (!mounted) { return; }
+      if (!mounted) return;
       setState(() {
         _localStream = stream;
       });
@@ -127,11 +128,15 @@ class _NormalCallState extends State<NormalCall> {
   bool isButtonDisabled = false;
   bool isChatButtonDisabled = false;
   bool chatOpened = false;
+  String connectedUserName = "";
+  String connectedUserID = "";
 
   void handleChatClosed(bool isOpened) {
     // Handle the chat state here
     if (!isOpened) {
       chatOpened = false;
+      connectedUserID = "";
+      connectedUserName = "";
     }
   }
 
@@ -198,28 +203,39 @@ class _NormalCallState extends State<NormalCall> {
       showAlertDialog(context, message);
       isButtonDisabled = false;
     });
-    socket.on('ask-chat',(_) {
-      showConfirmationDialog(context,'Connection wants to chat. Confirm?').then((data) {
-        socket.emit('reply-chat',data);
-        if(data!){
+    socket.on('ask-chat',(data) {
+      showConfirmationDialog(context,'Connection wants to chat. Confirm?').then((reply) {
+        if(reply!){
+          socket.emit('reply-chat',json.encode(<String,dynamic>{
+            "req": reply,
+            "id": id,
+            "name": name,
+          }));
+          connectedUserName = data['name'];
+          connectedUserID = data['id'];
           chatOpened = true;
           Navigator.push(context,
               MaterialPageRoute(builder:
-                  (context) => Chat(socket: socket,handleChatClosed: handleChatClosed,)
+                  (context) => Chat(socket: socket,handleChatClosed: handleChatClosed,name: connectedUserName,userID: connectedUserID,)
               )
           );
         }else{
+          socket.emit('reply-chat',json.encode(<String,dynamic>{
+            "req": reply,
+          }));
           showAlertDialog(context, "Response sent successfully!");
         }
       });
     });
     socket.on('reply-chat',(data){
       isChatButtonDisabled = false;
-      if(data){
+      if(data['req']){
+        connectedUserName = data['name'];
+        connectedUserID = data['id'];
         chatOpened = true;
         Navigator.push(context,
             MaterialPageRoute(builder:
-                (context) => Chat(socket: socket,handleChatClosed: handleChatClosed,)
+                (context) => Chat(socket: socket,handleChatClosed: handleChatClosed,name: connectedUserName,userID: connectedUserID,)
             )
         );
       }else{
@@ -240,7 +256,7 @@ class _NormalCallState extends State<NormalCall> {
   }
 
   Future<void> updateTokens() async {
-    const String apiUrl = "https://netteam-backend-production.up.railway.app/updateTokens";
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/updateTokens";
 
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -531,8 +547,9 @@ class _NormalCallState extends State<NormalCall> {
 
   late int tokens = 0;
   late String id;
+  late String name;
   Future<void> getTokens() async {
-    const String apiUrl = "https://netteam-backend-production.up.railway.app/getTokens";
+    String apiUrl = "${dotenv.env['BACKEND_URL']}/getTokens";
 
     try {
       final response = await http.post(Uri.parse(apiUrl),
@@ -568,6 +585,7 @@ class _NormalCallState extends State<NormalCall> {
   @override
   Widget build(BuildContext context) {
     id = Provider.of<MyDataContainer>(context).id;
+    name = Provider.of<MyDataContainer>(context).name;
     // print(id);
 
     getTokens();
@@ -714,7 +732,10 @@ class _NormalCallState extends State<NormalCall> {
                                 //Handle Chat Request
                                 if(isConnected){
                                   isChatButtonDisabled = true;
-                                  socket.emit('ask-chat');
+                                  socket.emit('ask-chat',json.encode(<String,dynamic>{
+                                    "id": id,
+                                    "name": name,
+                                  }));
                                   showAlertDialog(context, "Request sent successfully!");
                                 }
                               },

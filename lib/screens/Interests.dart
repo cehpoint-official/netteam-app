@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
@@ -30,6 +31,7 @@ class _InterestsState extends State<Interests>
   final TextEditingController _controller = TextEditingController();
   late MyDataContainer dataContainer;
   late String id;
+  late List<String> oldInterests;
 
   final List<InterestData> _professional = <InterestData>[
     InterestData(
@@ -244,7 +246,7 @@ class _InterestsState extends State<Interests>
     });
 
 
-    var url = Uri.parse('https://netteam-backend-production.up.railway.app/storeInterests'); // Replace with your API endpoint URL
+    var url = Uri.parse('${dotenv.env['BACKEND_URL']}/storeInterests'); // Replace with your API endpoint URL
     var requestBody = json.encode({
       '_id': id,
       'interests': interests,
@@ -256,8 +258,16 @@ class _InterestsState extends State<Interests>
     );
     if (response.statusCode == 200) {
       // Interests added successfully
-      print('Interests added successfully');
-      Navigator.pop(context);
+      if(oldInterests.isEmpty) {
+        dataContainer.updateData("","","","","","",[]);
+        print('Interests added successfully');
+        Navigator.pop(context);
+      }else{
+        setState(() {
+          Provider.of<MyDataContainer>(context,listen:false).interests = interests;
+          Navigator.pushReplacementNamed(context, "/profile");
+        });
+      }
     } else {
       // Interests addition failed
       print('Interst addition failed with status code: ${response.statusCode}');
@@ -280,6 +290,8 @@ class _InterestsState extends State<Interests>
   @override
   Widget build(BuildContext context) {
     id = Provider.of<MyDataContainer>(context).id;
+    oldInterests = Provider.of<MyDataContainer>(context).interests;
+    dataContainer = Provider.of<MyDataContainer>(context);
 
     return Scaffold(
       appBar: AppBar(
